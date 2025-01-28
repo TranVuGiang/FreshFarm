@@ -35,4 +35,29 @@ class ProductController extends Controller
             'data'=>$product,
         ],200);
     }
+
+    public function searchByName(Request $request)
+    {
+
+        $name = $request->query('name');
+
+
+        if (!$name) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Name parameter is required',
+            ], 400);
+        }
+
+
+        $products = cache()->remember("search_products_{$name}", 3600, function () use ($name) {
+            return Product::where('name', 'like', '%' . $name . '%')->paginate(5);
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $products,
+        ], 200);
+    }
+
 }
