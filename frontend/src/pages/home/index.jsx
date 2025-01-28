@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 // Import Swiper React components
 import { Swiper, SwiperSlide } from "swiper/react";
 
@@ -18,64 +18,123 @@ import { Autoplay, EffectFade, Navigation, Pagination } from "swiper/modules";
 import ActionButton from "@/shared/ActionButton";
 import Hero from "@/components/home/Hero";
 import Disscover from "@/components/home/Disscover";
+import ProductCard from "@/shared/ProductCard";
+import Promotion from "@/components/home/Promotion";
+import { useInView } from "react-intersection-observer";
 const products = [
   {
-    name: "Organic Vegetables",
-    description: "Fresh from our fields",
-    price: "$4.99/kg",
+    id: 1,
+    name: "Organic Apples",
+    category: "Fruits",
+    subCategory: "Citrus",
+    price: 5.99,
+    rating: 4.5,
+    image: "/images/bg-image1.png",
+    stock: 50,
+    discount: 10,
   },
   {
-    name: "Free Range Eggs",
-    description: "Farm fresh daily",
-    price: "$3.99/dozen",
+    id: 2,
+    name: "Fresh Spinach",
+    category: "Vegetables",
+    subCategory: "Leafy Greens",
+    price: 3.49,
+    rating: 4.2,
+    image: "/images/bg-image1.png",
+    stock: 30,
+    discount: 5,
   },
   {
-    name: "Artisan Honey",
-    description: "Pure and natural",
-    price: "$8.99/jar",
+    id: 3,
+    name: "Fresh Spinach",
+    category: "Vegetables",
+    subCategory: "Leafy Greens",
+    price: 3.49,
+    rating: 4.2,
+    image: "/images/bg-image1.png",
+    stock: 30,
+    discount: 5,
   },
   {
-    name: "Fresh Fruits",
-    description: "Seasonal selection",
-    price: "$5.99/kg",
+    id: 4,
+    name: "Fresh Spinach",
+    category: "Vegetables",
+    subCategory: "Leafy Greens",
+    price: 3.49,
+    rating: 4.2,
+    image: "/images/bg-image1.png",
+    stock: 30,
+    discount: 5,
+  },
+  {
+    id: 5,
+    name: "Fresh Spinach",
+    category: "Vegetables",
+    subCategory: "Leafy Greens",
+    price: 3.49,
+    rating: 4.2,
+    image: "/images/bg-image1.png",
+    stock: 30,
+    discount: 5,
   },
 ];
 
-const HomePages = () => {
+const HomePage = () => {
+  const { ref: heroRef, inView: heroIsVisible } = useInView({
+    threshold: 0.1,
+    triggerOnce: true,
+  });
+  const { ref: discoverRef, inView: discoverIsVisible } = useInView({
+    threshold: 0.1,
+    triggerOnce: true,
+  });
+  const { ref: promotionRef, inView: promotionIsVisible } = useInView();
+  const { ref: featureRef, inView: featureIsVisible } = useInView();
+
   return (
     <>
-     {/* Hero Section */}
-      <Hero />
+      {/* Hero Section */}
+      <section
+        ref={heroRef}
+      >
+        {heroIsVisible ? <Hero /> : null}
+      </section>
       {/* Discover Our Categories */}
-      <Disscover />
+      <section
+        ref={discoverRef}
+      >
+       {discoverIsVisible ?  <Disscover /> : null}
+      </section>
 
       {/* Featured Products */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <h2 className="text-3xl font-bold text-center text-green-800 mb-12">
-          Our Fresh Products
-        </h2>
+        <Promotion products={products} />
+      </div>
+
+      {/* Featured Products */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="flex justify-between items-center">
+          <div className="text-start space-y-6 mb-7">
+            <h2 className="text-4xl md:text-5xl font-bold text-black">
+              Eco-Friendly Choices
+            </h2>
+            <p className="text-lg md:text-xl text-black">
+              Explore a variety of fresh produce options.
+            </p>
+          </div>
+          <div className="text-end">
+            <ActionButton
+              title="Shop Now"
+              style={
+                "bg-white border-black border-[1px] text-black hover:bg-black hover:text-white transition-all duration-500 "
+              }
+            />
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {products.map((product, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition-transform"
-            >
-              <div className="h-48 bg-green-100"></div>
-              <div className="p-6">
-                <h3 className="text-xl font-semibold text-green-800 mb-2">
-                  {product.name}
-                </h3>
-                <p className="text-gray-600 mb-4">{product.description}</p>
-                <div className="flex justify-between items-center">
-                  <span className="text-green-800 font-bold">
-                    {product.price}
-                  </span>
-                  <button className="bg-green-800 text-white px-4 py-2 rounded-full hover:bg-green-700">
-                    Add to Cart
-                  </button>
-                </div>
-              </div>
-            </div>
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       </div>
@@ -111,4 +170,4 @@ const HomePages = () => {
   );
 };
 
-export default HomePages;
+export default HomePage;

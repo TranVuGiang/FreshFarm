@@ -16,7 +16,18 @@ const heroImageSlider = [
 // import required modules
 import { Autoplay, EffectFade } from "swiper/modules";
 import ActionButton from "@/shared/ActionButton";
+import { useGSAP } from "@gsap/react";
+import { animateWidthGsap } from "@/utils/animations";
+import gsap from "gsap";
 const Hero = () => {
+
+  useGSAP(() => {
+    gsap.to('#hero-title', {
+      opacity: 1,
+      y: 0
+    })
+  }, [])
+
   return (
     <>
       {/* Hero Section */}
@@ -53,7 +64,7 @@ const Hero = () => {
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 h-full flex items-center">
-          <div className="relative text-start z-10">
+          <div id="hero-title" className="relative text-start z-10 opacity-0 translate-y-20">
             <h1 className="text-4xl md:text-6xl font-bold mb-4">
               Farm Fresh Goodness
             </h1>
@@ -64,8 +75,7 @@ const Hero = () => {
             </p>
             <ActionButton
               title='Shop Now'
-              backgroundColor='bg-white'
-              textColor={'text-black'}
+              style={'bg-white text-black'}
             />
           </div>
         </div>

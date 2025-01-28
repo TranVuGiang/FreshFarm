@@ -5,9 +5,7 @@ import React from "react";
 const DefaultLayout = ({ children }) => {
   return (
     <div>
-      <header>
-        <Navbar />
-      </header>
+      <Navbar />
       <main>{children}</main>
       <Footer />
     </div>

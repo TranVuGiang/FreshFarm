@@ -1,11 +1,21 @@
 import ActionButton from "@/shared/ActionButton";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
 import React from "react";
 
 const Disscover = () => {
+
+  useGSAP(() => {
+    gsap.to('.title', {
+      opacity: 1,
+      y: 0
+    })
+  }, [])
+
   return (
     <>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 font-montserrat">
-        <div className="text-center space-y-6 mb-7">
+        <div className="title text-center space-y-6 mb-7">
           <h2 className="text-4xl md:text-5xl font-bold text-black">
             Discover Our Categories
           </h2>
@@ -14,7 +24,7 @@ const Disscover = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-8">
           {/* Vegetables Category */}
           <div className="group relative h-[500px] overflow-hidden rounded-2xl cursor-pointer">
             <div className="absolute inset-0 transition-transform duration-300 group-hover:scale-105">
@@ -33,8 +43,7 @@ const Disscover = () => {
                   </p>
                   <ActionButton
                     title={"Shop Now"}
-                    backgroundColor="bg-white"
-                    textColor={"text-black"}
+                    style={"bg-white text-black"}
                   />
                 </div>
               </div>
@@ -55,10 +64,9 @@ const Disscover = () => {
                 <h3 className="text-2xl font-bold mb-2">Fresh Fruits</h3>
                 <p className="text-sm mb-4">Seasonal and exotic fruits</p>
                 <ActionButton
-                    title={"Shop Now"}
-                    backgroundColor="bg-white"
-                    textColor={"text-black"}
-                  />
+                  title={"Shop Now"}
+                  style={"bg-white text-black"}
+                />
               </div>
             </div>
           </div>
@@ -77,10 +85,9 @@ const Disscover = () => {
                 <h3 className="text-2xl font-bold mb-2">Dairy Products</h3>
                 <p className="text-sm mb-4">Fresh milk, cheese, and more</p>
                 <ActionButton
-                    title={"Shop Now"}
-                    backgroundColor="bg-white"
-                    textColor={"text-black"}
-                  />
+                  title={"Shop Now"}
+                  style={"bg-white text-black"}
+                />
               </div>
             </div>
           </div>

@@ -9,16 +9,15 @@ import {
 import ShoppingCart from "./ShoppingCart";
 import LoginPage from "@/pages/login";
 import { Link } from "react-router-dom";
-
 const navLists = [
-  { label: "Trang chủ", path: "/" },
+  { label: "Trang chủ", path: "/",},
   { label: "Danh mục", path: "/danhmuc" },
   { label: "Khuyến mãi", path: "/khuyenmai" },
   { label: "Giới thiệu", path: "/gioithieu" },
   { label: "Liên hệ", path: "/lienhe" },
 ];
 
-const Navbar = () => {
+const NavbarDefault = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -41,11 +40,7 @@ const Navbar = () => {
       <div className="">
         {/* Thanh điều hướng chính */}
         <div
-          className={`w-full flex items-center justify-between px-5 py-4 ${
-            isScrolled
-              ? "bg-black shadow-lg transition duration-500"
-              : "bg-transparent"
-          }`}
+          className={`w-full flex items-center justify-between px-5 py-4 bg-black shadow-lg`}
         >
           {/* Logo */}
           <div className="flex items-center">
@@ -134,9 +129,10 @@ const Navbar = () => {
                 <Link
                   key={i}
                   to={nav.path}
-                  className="block px-3 py-2 rounded-md hover:bg-green-700"
+                  className="rounded-md relative group"
                 >
                   {nav.label}
+                  <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-green-900 group-hover:w-full transition-all duration-500 ease-in-out"></span>
                 </Link>
               ))}
             </div>
@@ -144,13 +140,9 @@ const Navbar = () => {
         </div>
       )}
 
-      {/* Navbar */}
+      {/* NavbarDefault */}
       <nav
-        className={`hidden bg-transparent shadow-lg bg-white ${
-          isScrolled
-            ? "shadow-lg transition duration-500 text-black"
-            : "bg-opacity-30 text-white"
-        } md:block z-10`}
+        className={`hidden bg-transparent shadow-lg bg-white transition duration-500 text-black md:block z-10`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-5 lg:px-8">
           <div className="flex items-center justify-center h-14">
@@ -158,11 +150,7 @@ const Navbar = () => {
             <div className="hidden md:block">
               <div className="flex items-center space-x-8">
                 {navLists.map((nav, i) => (
-                  <Link
-                    key={i}
-                    to={nav.path}
-                    className="rounded-md relative group"
-                  >
+                  <Link key={i} to={nav.path} className="rounded-md relative group">
                     {nav.label}
                     <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-green-900 group-hover:w-full transition-all duration-500 ease-in-out"></span>
                   </Link>
@@ -202,4 +190,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default NavbarDefault;
