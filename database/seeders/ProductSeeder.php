@@ -33,6 +33,9 @@ class ProductSeeder extends Seeder
                 'price' => $faker->randomFloat(2, 10, 100), // Giá từ 10k đến 100k
                 'image' => $faker->imageUrl(640, 480, 'food', true, 'Rau củ'), // Ảnh giả lập
                 'stock_quantity' => $faker->numberBetween(50, 500), // Tồn kho từ 50 đến 500
+                'weight' => $faker->randomFloat(2, 0.1, 5), // Khối lượng từ 0.1kg đến 5kg
+                'origin' => $faker->country(), // Xuất xứ ngẫu nhiên
+                'certification' => $faker->randomElement(['VietGAP', 'GlobalGAP', 'HACCP', 'Không']), // Chứng nhận ngẫu nhiên
                 'status' => $faker->boolean(80), // 80% sản phẩm đang hoạt động
                 'created_at' => now(),
                 'updated_at' => now(),
