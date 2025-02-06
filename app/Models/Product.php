@@ -17,6 +17,9 @@ class Product extends Model
         'image',
         'description',
         'stock_quantity',
+        'weight',
+        'origin',
+        'certification',
         'status',
     ];
 

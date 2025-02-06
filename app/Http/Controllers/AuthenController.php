@@ -65,4 +65,21 @@ class AuthenController extends Controller
             'message' => 'Đăng xuất thành công',
         ]);
     }
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            if (auth()->check()) {
+                $token = $request->user()->currentAccessToken();
+
+                // Kiểm tra nếu token đã hết hạn
+                if ($token && $token->created_at->addMinutes(config('sanctum.expiration', 60*24))->isPast()) {
+                    $token->delete();
+                    return response()->json([
+                        'message' => 'Token đã hết hạn, vui lòng đăng nhập lại',
+                    ], 401);
+                }
+            }
+            return $next($request);
+        })->except(['login', 'register']);
+    }
 }
