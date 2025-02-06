@@ -73,4 +73,19 @@ class ProductController extends Controller
             'data' => $product,
         ], 200);
     }
+    public function showCategory()
+    {
+        $categories = Category::all();
+        if(!$categories)
+        {
+            return response()->json([
+                'success' => false,
+                'message' => 'Categories not found',
+            ],404);
+        }
+        return response()->json([
+            'success' => true,
+            'data' => $categories,
+        ],200);
+    }
 }
