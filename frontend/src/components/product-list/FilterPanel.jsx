@@ -1,7 +1,5 @@
+import { api_LoadCategories } from "@/utils/authService";
 import {
-  Disclosure,
-  DisclosureButton,
-  DisclosurePanel,
   Menu,
   MenuButton,
   MenuItem,
@@ -9,56 +7,54 @@ import {
   Switch,
 } from "@headlessui/react";
 import { MinusIcon, PlusIcon } from "@heroicons/react/24/solid";
-import React from "react";
-
-const categoryOptions = {
-  Fruits: ["Citrus", "Berries", "Tropical"],
-  Vegetables: ["Leafy Greens", "Root", "Legumes"],
-  Dairy: ["Milk", "Cheese", "Yogurt"],
-  Meat: ["Poultry", "Beef", "Seafood"],
-};
+import { useEffect, useState } from "react";
 
 const FilterPanel = ({ filters, setFilters }) => {
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const resp = await api_LoadCategories();
+        setCategories(resp.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    loadCategories();
+  }, []);
+
   return (
     <div className="w-full pr-6 border-2 p-4 rounded-md">
-      {/* Danh Mục */}
+      {/* Danh Mục Sản Phẩm */}
       <div className="mb-6">
         <h3 className="font-bold mb-3">Danh Mục Sản Phẩm</h3>
-        {Object.keys(categoryOptions).map((category) => (
-          <Disclosure key={category}>
-            {({ open }) => (
-              <>
-                <DisclosureButton className="flex items-center justify-between w-full font-medium py-2">
-                  <span>{category}</span>
-                  <span>{open ? <MinusIcon className="size-5"/> : <PlusIcon className="size-5"/>}</span>
-                </DisclosureButton>
-                <DisclosurePanel className="pl-4 border-l-2 ">
-                  {categoryOptions[category].map((sub) => (
-                    <a
-                      key={sub}
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setFilters((prev) => ({
-                          ...prev,
-                          category,
-                          subCategory: sub,
-                        }));
-                      }}
-                      className={`block text-sm mb-1 hover:text-blue-500 ${
-                        filters.subCategory === sub
-                          ? "text-blue-500 font-bold"
-                          : ""
-                      }`}
-                    >
-                      {sub}
-                    </a>
-                  ))}
-                </DisclosurePanel>
-              </>
-            )}
-          </Disclosure>
-        ))}
+        <div className="grid grid-cols-1 gap-4">
+          {categories.map((cat) => (
+            <div
+              key={cat.id_categories}
+              className="p-2 border rounded hover:border-blue-500 hover:text-blue-500 transition-colors cursor-pointer"
+            >
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setFilters((prev) => ({
+                    ...prev,
+                    category: cat.id_categories,
+                  }));
+                }}
+                className={`block text-md ${
+                  filters.category === cat.id_categories
+                    ? "text-blue-500 font-bold"
+                    : ""
+                }`}
+              >
+                {cat.name}
+              </a>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Khoảng Giá */}
@@ -99,7 +95,8 @@ const FilterPanel = ({ filters, setFilters }) => {
                   }))
                 }
               >
-                {min.toLocaleString('vi-VN')} VND - {max.toLocaleString('vi-VN')} VND
+                {min.toLocaleString("vi-VN")} VND -{" "}
+                {max.toLocaleString("vi-VN")} VND
               </MenuItem>
             ))}
           </MenuItems>

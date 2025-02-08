@@ -1,10 +1,11 @@
 import React from "react";
 import { ShoppingCart, Heart } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { CreateSlug } from "@/utils/createUrlSlug";
 
 const ProductCard = ({ product }) => {
-
-  console.log(product)
-
+  const navigate = useNavigate()
+  
   const calculateDiscountedPrice = () => {
     // Chuyển đổi giá và chiết khấu sang số
     const price = Number(product.price);
@@ -23,8 +24,13 @@ const ProductCard = ({ product }) => {
     return discountedPrice.toLocaleString('vi-VN') + ' VND';
   };
 
+  const handleProductDetail = ( name, id ) => {
+    const productSlug = CreateSlug(name)
+    navigate(`/danh-muc/chitietsanpham?name=${productSlug}&id=${id}`);
+  }
+
   return (
-    <div className="relative bg-white rounded-xl shadow-lg overflow-hidden group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+    <div onClick={() => handleProductDetail(product.name, product.id_product)} className="relative bg-white rounded-xl shadow-lg overflow-hidden group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer">
       {/* Product Image */}
       <div className="relative h-48 md:h-56 overflow-hidden">
         <img

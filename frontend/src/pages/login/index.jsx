@@ -1,14 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Mail, Lock, LogIn, XIcon } from "lucide-react";
+import { Mail, Lock, LogIn, XIcon, Loader2 } from "lucide-react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import SignupPage from "../signup";
 import ForgotPasswordPage from "../forgotpassword";
+import { api_LogIn } from "@/utils/authService";
+import { useNavigate } from "react-router-dom";
+import { SuccessNotification } from "@/components/notifications";
 
 const LoginPage = ({ isOpen, onClose }) => {
   const wrapperRef = useRef(null);
   const [showSignUp, setShowSignUp] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -63,9 +68,41 @@ const LoginPage = ({ isOpen, onClose }) => {
       .required("Vui lòng nhập mật khẩu"),
   });
 
-  const handleSubmit = (values) => {
+  const handleSubmit = async (values) => {
+    try {
+      const resp = await api_LogIn({
+        email: values.email,
+        password: values.password,
+      });
+      console.log(resp)
+      if(resp?.token) {
+        if(rememberMe) {
+          localStorage.setItem("token", resp.token);
+        } else {
+          sessionStorage.setItem("token", resp.token);
+        }
+      }
+      setIsSuccess(true);
+      window.location.reload();
+    } catch (error) {
+      console.log(error);
+    }
     console.log("Login attempt:", values);
   };
+
+  if (isSuccess) {
+    return (
+      <>
+        <SuccessNotification
+          isOpen={isSuccess}
+          onClose={() => setIsSuccess(false)}
+          title={"Đăng nhập thành công"}
+          message={"Bạn đã có thể mua sắm thoả thích"}
+          buttonText={"Đóng"}
+        />
+      </>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 font-montserrat">
@@ -136,6 +173,8 @@ const LoginPage = ({ isOpen, onClose }) => {
                     <label className="flex items-center space-x-2">
                       <input
                         type="checkbox"
+                        value={rememberMe}
+                        onChange={() => setRememberMe(!rememberMe)}
                         className="w-4 h-4 border-gray-300 rounded text-green-600 focus:ring-green-500"
                       />
                       <span className="text-sm text-gray-600">
@@ -152,12 +191,21 @@ const LoginPage = ({ isOpen, onClose }) => {
 
                   <button
                     type="submit"
-                    className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition flex items-center justify-center space-x-2"
+                    className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition "
                     disabled={isSubmitting}
                   >
-                    <LogIn className="h-5 w-5" />
                     <span>
-                      {isSubmitting ? "Đang đăng nhập..." : "Đăng nhập"}
+                      {isSubmitting ? (
+                        <div className="flex items-center justify-center space-x-2">
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Đang đăng nhập...
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center space-x-2">
+                          <LogIn className="h-5 w-5" />
+                          Đăng nhập
+                        </div>
+                      )}
                     </span>
                   </button>
                 </Form>

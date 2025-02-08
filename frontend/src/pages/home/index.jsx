@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 // Import Swiper React components
 import { Swiper, SwiperSlide } from "swiper/react";
 
@@ -14,70 +14,15 @@ const heroImageSlider = [
   "/images/farm.png",
 ];
 // import required modules
-import { Autoplay, EffectFade, Navigation, Pagination } from "swiper/modules";
 import ActionButton from "@/shared/ActionButton";
 import Hero from "@/components/home/Hero";
 import Disscover from "@/components/home/Disscover";
 import ProductCard from "@/shared/ProductCard";
 import Promotion from "@/components/home/Promotion";
 import { useInView } from "react-intersection-observer";
-const products = [
-  {
-    id: 1,
-    name: "Organic Apples",
-    category: "Fruits",
-    subCategory: "Citrus",
-    price: 5.99,
-    rating: 4.5,
-    image: "/images/bg-image1.png",
-    stock: 50,
-    discount: 10,
-  },
-  {
-    id: 2,
-    name: "Fresh Spinach",
-    category: "Vegetables",
-    subCategory: "Leafy Greens",
-    price: 3.49,
-    rating: 4.2,
-    image: "/images/bg-image1.png",
-    stock: 30,
-    discount: 5,
-  },
-  {
-    id: 3,
-    name: "Fresh Spinach",
-    category: "Vegetables",
-    subCategory: "Leafy Greens",
-    price: 3.49,
-    rating: 4.2,
-    image: "/images/bg-image1.png",
-    stock: 30,
-    discount: 5,
-  },
-  {
-    id: 4,
-    name: "Fresh Spinach",
-    category: "Vegetables",
-    subCategory: "Leafy Greens",
-    price: 3.49,
-    rating: 4.2,
-    image: "/images/bg-image1.png",
-    stock: 30,
-    discount: 5,
-  },
-  {
-    id: 5,
-    name: "Fresh Spinach",
-    category: "Vegetables",
-    subCategory: "Leafy Greens",
-    price: 3.49,
-    rating: 4.2,
-    image: "/images/bg-image1.png",
-    stock: 30,
-    discount: 5,
-  },
-];
+import { jwtDecode } from "jwt-decode";
+import { api_GetUserDetails } from "@/utils/authService";
+
 
 const HomePage = () => {
   const { ref: heroRef, inView: heroIsVisible } = useInView({
@@ -90,6 +35,24 @@ const HomePage = () => {
   });
   const { ref: promotionRef, inView: promotionIsVisible } = useInView();
   const { ref: featureRef, inView: featureIsVisible } = useInView();
+
+  const [products, setProducts] = useState([])
+
+
+  useEffect(() => {
+    // Fetch products
+    const token = localStorage.getItem("token");
+    console.log(token);
+    
+    if(token) {
+      const loadUser = async () => {
+        const resp = await api_GetUserDetails(token);
+        console.log(resp)
+      }
+    loadUser();
+
+    }
+  } ,[])
 
   return (
     <>

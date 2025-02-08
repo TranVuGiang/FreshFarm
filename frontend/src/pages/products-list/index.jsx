@@ -1,90 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Star, ShoppingCart, Heart, X, Filter } from "lucide-react";
-import {
-  Disclosure,
-  DisclosureButton,
-  DisclosurePanel,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuItems,
-  Switch,
-} from "@headlessui/react";
-import { MinusIcon, PlusIcon } from "@heroicons/react/24/solid";
 import FilterPanel from "@/components/product-list/FilterPanel";
 import ProductCard from "@/shared/ProductCard";
-
-const initialProducts = [
-  {
-    id: 1,
-    name: "Cà rốt - Loại 1 Kg",
-    category: "Fruits",
-    subCategory: "Citrus",
-    price: 120000,
-    rating: 4.5,
-    image: "/images/bg-image1.png",
-    stock: 50,
-  },
-  {
-    id: 2,
-    name: "Fresh Spinach",
-    category: "Vegetables",
-    subCategory: "Leafy Greens",
-    price: 120000,
-    rating: 4.2,
-    image: "/images/bg-image1.png",
-    stock: 30,
-    discount: 5,
-  },
-  {
-    id: 3,
-    name: "Fresh Spinach",
-    category: "Vegetables",
-    subCategory: "Leafy Greens",
-    price: 120000,
-    rating: 4.2,
-    image: "/images/bg-image1.png",
-    stock: 30,
-    discount: 5,
-  },
-  {
-    id: 4,
-    name: "Fresh Spinach",
-    category: "Vegetables",
-    subCategory: "Leafy Greens",
-    price: 120000,
-    rating: 4.2,
-    image: "/images/bg-image1.png",
-    stock: 30,
-    discount: 5,
-  },
-  {
-    id: 5,
-    name: "Fresh Spinach",
-    category: "Vegetables",
-    subCategory: "Leafy Greens",
-    price: 120000,
-    rating: 4.2,
-    image: "/images/bg-image1.png",
-    stock: 30,
-    discount: 5,
-  },
-  // Add more mock products
-];
-
-const categoryOptions = {
-  Fruits: ["Citrus", "Berries", "Tropical"],
-  Vegetables: ["Leafy Greens", "Root", "Legumes"],
-  Dairy: ["Milk", "Cheese", "Yogurt"],
-  Meat: ["Poultry", "Beef", "Seafood"],
-};
+import { api_LoadProducts } from "@/utils/authService";
+import { useNavigate } from "react-router-dom";
 
 const ProductCategoryPage = () => {
-  const [products, setProducts] = useState(initialProducts);
-  const [filteredProducts, setFilteredProducts] = useState(initialProducts);
+  const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [filters, setFilters] = useState({
     category: "",
-    subCategory: "",
     priceRange: [0, 200000],
     ratings: [],
     inStock: false,
@@ -97,12 +22,7 @@ const ProductCategoryPage = () => {
 
     // Filter by category
     if (filters.category) {
-      result = result.filter((p) => p.category === filters.category);
-    }
-
-    // Filter by subCategory
-    if (filters.subCategory) {
-      result = result.filter((p) => p.subCategory === filters.subCategory);
+      result = result.filter((p) => p.id_categories === filters.category);
     }
 
     // Price range filter
@@ -140,6 +60,22 @@ const ProductCategoryPage = () => {
 
     setFilteredProducts(result);
   }, [filters, sort, products]);
+
+
+  useEffect(() => {
+    loadProductsData()
+  }, []);
+
+  const loadProductsData = async () => {
+    try {
+      const resp = await api_LoadProducts()
+      console.log(resp)
+      setProducts(resp.data.data)
+    } catch (error) {
+      console.log(error);
+      
+    }
+  }
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-24 md:pt-44 lg:pt-44 pb-10">
@@ -193,7 +129,7 @@ const ProductCategoryPage = () => {
         <div className="flex-1">
           <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
             <h1 className="hidden xl:block text-xl lg:text-3xl font-bold text-green-800 mb-4 sm:mb-0">
-              Rau Củ Quả / Dạng Hạt
+              Rau Củ Quả
             </h1>
           </div>
 
@@ -232,7 +168,7 @@ const ProductCategoryPage = () => {
 
           <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 md:grid-cols-3 gap-4 sm:gap-6">
             {filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product.id_product} product={product} />
             ))}
           </div>
 

@@ -8,14 +8,14 @@ import {
 } from "@heroicons/react/24/solid";
 import ShoppingCart from "./ShoppingCart";
 import LoginPage from "@/pages/login";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const navLists = [
   { label: "Trang chủ", path: "/" },
-  { label: "Danh mục", path: "/danhmuc" },
-  { label: "Khuyến mãi", path: "/khuyenmai" },
-  { label: "Giới thiệu", path: "/gioithieu" },
-  { label: "Liên hệ", path: "/lienhe" },
+  { label: "Danh mục", path: "/danh-muc" },
+  { label: "Khuyến mãi", path: "/khuyen-mai" },
+  { label: "Giới thiệu", path: "/gioi-thieu" },
+  { label: "Liên hệ", path: "/lien-he" },
 ];
 
 const Navbar = () => {
@@ -23,6 +23,10 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [token, setToken] = useState("");
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -35,6 +39,25 @@ const Navbar = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   });
+
+  useEffect(() => {
+    const savedtoken = localStorage.getItem("token");
+    setToken(savedtoken);
+  }, []);
+
+  // Handle Search
+  const handleSearch = (event) => {
+    event.preventDefault();
+    navigate(`/products/search?q=${searchQuery}`);
+  };
+
+  // Handle Logout
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setToken(null);
+    setIsAccountMenuOpen(false);
+    window.location.reload();
+  };
 
   return (
     <header className="fixed w-full z-30 font-montserrat">
@@ -59,32 +82,61 @@ const Navbar = () => {
 
           {/* Thanh tìm kiếm (Ẩn trên màn hình nhỏ) */}
           <div className="hidden md:flex items-center justify-center w-1/2">
-            <div className="relative w-full max-w-md">
+            <form onSubmit={handleSearch} className="relative w-full max-w-md">
               <input
                 type="text"
                 placeholder="Tìm kiếm..."
                 className="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
               />
-              <button className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-500 focus:outline-none">
+              <button
+                type="submit"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-500 focus:outline-none"
+              >
                 <MagnifyingGlassIcon className="h-5 w-5 text-black" />
               </button>
-            </div>
+            </form>
           </div>
 
           {/* Icon điều hướng */}
           <div className="flex items-center space-x-4 text-white">
-            <div className="relative">
-              <button
-                className="relative cursor-pointer hover:text-gray-300"
-                onClick={() => setIsLoginOpen(true)}
-              >
-                <UserIcon className="h-6 w-6" />
-              </button>
-              <LoginPage
-                isOpen={isLoginOpen}
-                onClose={() => setIsLoginOpen(false)}
-              />
-            </div>
+            {token ? (
+              <div className="relative">
+                <button
+                  className="relative cursor-pointer hover:text-gray-300"
+                  onClick={() => setIsAccountMenuOpen(!isAccountMenuOpen)}
+                >
+                  <UserIcon className="h-6 w-6" />
+                </button>
+                {isAccountMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white text-black shadow-lg rounded-lg py-2">
+                    <Link to="/profile" className="block px-4 py-2 hover:bg-gray-200">
+                      Thông tin tài khoản
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="block w-full text-left px-4 py-2 hover:bg-gray-200"
+                    >
+                      Đăng xuất
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="relative">
+                <button
+                  className="relative cursor-pointer hover:text-gray-300"
+                  onClick={() => setIsLoginOpen(true)}
+                >
+                  <UserIcon className="h-6 w-6" />
+                </button>
+                <LoginPage
+                  isOpen={isLoginOpen}
+                  onClose={() => setIsLoginOpen(false)}
+                />
+              </div>
+            )}
             <div className="relative">
               <button
                 className="relative cursor-pointer hover:text-gray-300"
