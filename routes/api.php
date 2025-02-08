@@ -4,6 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\AuthenController;
+use App\Http\Controllers\ShoppingCartController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -27,4 +29,13 @@ Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthenController::class, 'register']);
     Route::post('/login', [AuthenController::class, 'login']);
     Route::post('/logout', [AuthenController::class, 'logout'])->middleware('auth:sanctum');
+});
+Route::middleware('auth:sanctum')->group(function () {
+    Route::prefix('cart')->group(function () {
+        Route::get('/', [ShoppingCartController::class, 'index']);
+        Route::post('/add', [ShoppingCartController::class, 'addToCart']);
+        Route::put('/detail/{id_cart_detail}', [ShoppingCartController::class, 'updateQuantity']);
+        Route::delete('/detail/{id_cart_detail}', [ShoppingCartController::class, 'removeFromCart']);
+        Route::delete('/', [ShoppingCartController::class, 'clearCart']);
+    });
 });
