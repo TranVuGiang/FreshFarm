@@ -37,6 +37,7 @@ class ProductSeeder extends Seeder
                 'origin' => $faker->country(), // Xuất xứ ngẫu nhiên
                 'certification' => $faker->randomElement(['VietGAP', 'GlobalGAP', 'HACCP', 'Không']), // Chứng nhận ngẫu nhiên
                 'status' => $faker->boolean(80), // 80% sản phẩm đang hoạt động
+                'description' => $faker->paragraph, // Mô tả sản phẩm
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
