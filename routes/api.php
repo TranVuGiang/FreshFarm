@@ -18,9 +18,11 @@ use App\Http\Controllers\ShoppingCartController;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+
+
+Route::middleware('auth:sanctum')->get('/user', [AuthenController::class, 'getCurrentUser']);
+
+
 Route::get('/showProduct', [ProductController::class, 'index']);
 Route::get('/products/category/{idcategory}', [ProductController::class, 'showByCategory']);
 Route::get('/searchProducts', [ProductController::class, 'searchByName']);

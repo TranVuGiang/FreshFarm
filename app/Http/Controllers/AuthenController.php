@@ -72,7 +72,7 @@ class AuthenController extends Controller
                 $token = $request->user()->currentAccessToken();
 
                 // Kiểm tra nếu token đã hết hạn
-                if ($token && $token->created_at->addMinutes(config('sanctum.expiration', 60*24))->isPast()) {
+                if ($token && $token->expires_at && $token->expires_at->isPast()) {
                     $token->delete();
                     return response()->json([
                         'message' => 'Token đã hết hạn, vui lòng đăng nhập lại',
@@ -82,4 +82,14 @@ class AuthenController extends Controller
             return $next($request);
         })->except(['login', 'register']);
     }
+
+    public function getCurrentUser(Request $request)
+    {
+        return response()->json([
+            'message' => 'Lấy thông tin thành công',
+            'user' => $request->user()
+        ]);
+    }
+
+
 }
