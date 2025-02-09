@@ -25,8 +25,12 @@ class ShoppingCartController extends Controller
         }
 
         return response()->json([
-            'cart' => $cart,
-            'total_price' => $cart->total_price
+            'message'=>'Lấy thông tin thành công',
+            'data' => [
+                'cart' => $cart,
+                'total_price' => $cart->total_price,
+            ],
+            'success'=>true
         ]);
     }
 
