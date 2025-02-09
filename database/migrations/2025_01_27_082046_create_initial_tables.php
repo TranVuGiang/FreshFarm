@@ -42,6 +42,7 @@ return new class extends Migration
             $table->float('price');
             $table->string('image', 255);
             $table->integer('stock_quantity');
+            $table->string('description',500);
             $table->boolean('status')->default(true);
             $table->timestamps();
         });

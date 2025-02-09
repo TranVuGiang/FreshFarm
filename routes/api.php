@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\AuthenController;
+use App\Http\Controllers\BillController;
 use App\Http\Controllers\ShoppingCartController;
 
 /*
@@ -38,4 +39,5 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/detail/{id_cart_detail}', [ShoppingCartController::class, 'removeFromCart']);
         Route::delete('/', [ShoppingCartController::class, 'clearCart']);
     });
+    Route::post('/checkout',[BillController::class,'checkout']);
 });
