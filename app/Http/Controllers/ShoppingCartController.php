@@ -26,10 +26,8 @@ class ShoppingCartController extends Controller
 
         return response()->json([
             'message'=>'Lấy thông tin thành công',
-            'data' => [
-                'cart' => $cart,
-                'total_price' => $cart->total_price,
-            ],
+            'data' =>  $cart,
+
             'success'=>true
         ]);
     }
@@ -211,7 +209,6 @@ class ShoppingCartController extends Controller
         $cart = Cart::find($id_cart);
         $total = CartDetail::where('id_cart', $id_cart)
             ->sum(DB::raw('price * quantity'));
-
         $cart->total_price = $total;
         $cart->save();
     }

@@ -6,6 +6,8 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\AuthenController;
 use App\Http\Controllers\BillController;
 use App\Http\Controllers\ShoppingCartController;
+use App\Http\Controllers\Admin\AdminProductController;
+use app\Http\Controllers\Admin\AdminCategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -42,4 +44,27 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/', [ShoppingCartController::class, 'clearCart']);
     });
     Route::post('/checkout',[BillController::class,'checkout']);
+
+    Route::get('/orders', [BillController::class, 'getMyOrder']);
+    Route::get('/orders/{id_bill}', [BillController::class, 'getMyOrderDetail']);
+    Route::post('/orders/{id_bill}/cancel', [BillController::class, 'cancelOrder']);
+
+
+    Route::prefix('admin')->group(function () {
+
+        Route::prefix('products')->group(function () {
+            Route::get('/', [ProductController::class, 'index']);
+            Route::post('/', [AdminProductController::class, 'store']);
+            Route::put('/{id}', [AdminProductController::class, 'update']);
+            Route::delete('/{id}', [AdminProductController::class, 'destroy']);
+        });
+
+
+        Route::prefix('categories')->group(function () {
+            Route::get('/', [AdminCategoryController::class, 'index']);
+            Route::post('/', [AdminCategoryController::class, 'store']);
+            Route::put('/{id}', [AdminCategoryController::class, 'update']);
+            Route::delete('/{id}', [AdminCategoryController::class, 'destroy']);
+        });
+    });
 });

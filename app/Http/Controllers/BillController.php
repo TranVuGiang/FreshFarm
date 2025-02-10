@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\CartDetail;
+use App\Enums\BillStatusEnum;
+use App\Enums\OrderStatus;
+use App\Enums\PaymentStatus;
+use App\Enums\PaymentMethodStatus;
+
 class BillController extends Controller
 {
     //
@@ -40,9 +45,9 @@ class BillController extends Controller
             $bill->email = Auth::user()->email;
             $bill->delivery_date = now()->addDays(3);
             $bill->total = $cart->total_price;
-            $bill->payment_status = 0; // 0: Chưa thanh toán, 1: Đã thanh toán
-            $bill->payment_method = $request->input('payment_method', 1); // 1: Tiền mặt, 2: Chuyển khoản
-            $bill->status = 1; // 1: Đang xử lý
+            $bill->payment_status = PaymentStatus::NOT_PAID;
+            $bill->payment_method = $request->input('payment_method', PaymentMethodStatus::CASH);
+            $bill->status = OrderStatus::ORDER;
             $bill->save();
 
             foreach ($cart->cartDetails as $cartDetail) {
@@ -74,6 +79,87 @@ class BillController extends Controller
             return response()->json([
                 'message'=>'có lỗi xảy ra: '.$e->getMessage()
             ],500);
+        }
+
+    }
+
+    public function getMyOrder()
+    {
+         try{
+            $order= bill::with(['billDetails.product'])
+            ->where('id_user',Auth::id())
+            ->orderBy('created_at','desc')->get();
+            return response()->json([
+                'message'=>'Lấy thông tin thành công',
+                'success'=>true,
+                'data'=>$order
+            ],200);
+         }catch(\Exception $e)
+         {
+            return response()->json([
+                'message'=>'có lỗi xảy ra: '.$e->getMessage()
+            ],500);
+         }
+    }
+
+    public function getMyOrderDetail($id_bill)
+    {
+        try
+        {
+            $order = bill::with(['billDetails.product', 'user'])
+            ->where('id_bill', $id_bill)
+            ->where('id_user', Auth::id())
+            ->first();
+            if (!$order) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy đơn hàng'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message'=>'Lấy thông tin thành công',
+                'data' => $order
+            ]);
+        }catch(\Exception $e)
+        {
+            return response()->json([
+                'message'=>'có lỗi xảy ra: '.$e->getMessage()],500);
+        }
+    }
+
+    public function cancelOrder($id_bill)
+    {
+        try{
+            $order = bill::where('id_bill',$id_bill)
+            ->where('id_user',Auth::id())->first();
+            if (!$order) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy đơn hàng'
+                ], 404);
+            }
+             if (!in_array($order->status, [OrderStatus::ORDER,OrderStatus::PACK])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không thể hủy đơn hàng ở trạng thái này'
+                ], 400);
+            }
+
+            $order->status =OrderStatus::DESTROY;
+            $order->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Hủy đơn hàng thành công'
+            ]);
+
+
+        }catch(\Exception $e)
+        {
+            return response()->json([
+                'message'=>'có lỗi xảy ra: '.$e->getMessage()],500);
         }
     }
 }
