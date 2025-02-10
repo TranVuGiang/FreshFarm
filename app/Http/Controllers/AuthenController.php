@@ -28,7 +28,7 @@ class AuthenController extends Controller
             'password' => Hash::make($request->password),
             'phone' => $request->phone,
             'address' => $request->address,
-            'role' => $request->role ?? 0,
+            'role' => 0,
         ]);
         $token = $user->createToken('auth_token')->plainTextToken;
         return response()->json([
@@ -88,6 +88,30 @@ class AuthenController extends Controller
         return response()->json([
             'message' => 'Lấy thông tin thành công',
             'user' => $request->user()
+        ]);
+    }
+    public function updateUser(Request $request)
+    {
+        $request->validate([
+            'name' => 'nullable|string|max:255',
+            'firstname' => 'nullable|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . auth()->id(),
+            'phone' => 'nullable|string|max:255',
+            'address' => 'nullable|string|max:255',
+        ]);
+
+        $user = auth()->user();
+        $user->update([
+            'name' => $request->name,
+            'firstname' => $request->firstname,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'address' => $request->address,
+        ]);
+
+        return response()->json([
+            'message' => 'Cập nhật thông tin thành công',
+            'user' => $user,
         ]);
     }
 

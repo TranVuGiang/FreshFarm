@@ -23,6 +23,7 @@ use app\Http\Controllers\Admin\AdminCategoryController;
 
 
 Route::middleware('auth:sanctum')->get('/user', [AuthenController::class, 'getCurrentUser']);
+Route::middleware('auth:sanctum')->put('/user/update', [AuthenController::class, 'updateUser']);
 
 
 Route::get('/showProduct', [ProductController::class, 'index']);
