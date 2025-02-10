@@ -91,29 +91,29 @@ class AuthenController extends Controller
         ]);
     }
     public function updateUser(Request $request)
-    {
-        $request->validate([
-            'name' => 'nullable|string|max:255',
-            'firstname' => 'nullable|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . auth()->id(),
-            'phone' => 'nullable|string|max:255',
-            'address' => 'nullable|string|max:255',
-        ]);
+{
+    $request->validate([
+        'name' => 'nullable|string|max:255',
+        'firstname' => 'nullable|string|max:255',
+        'email' => 'required|string|email|max:255|unique:users,email,' . auth()->user()->id_user . ',id_user',
+        'phone' => 'nullable|string|max:255',
+        'address' => 'nullable|string|max:255',
+    ]);
 
-        $user = auth()->user();
-        $user->update([
-            'name' => $request->name,
-            'firstname' => $request->firstname,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'address' => $request->address,
-        ]);
+    $user = auth()->user();
+    $user->update([
+        'name' => $request->name,
+        'firstname' => $request->firstname,
+        'email' => $request->email,
+        'phone' => $request->phone,
+        'address' => $request->address,
+    ]);
 
-        return response()->json([
-            'message' => 'Cập nhật thông tin thành công',
-            'user' => $user,
-        ]);
-    }
+    return response()->json([
+        'message' => 'Cập nhật thông tin thành công',
+        'user' => $user,
+    ]);
+}
 
 
 }
