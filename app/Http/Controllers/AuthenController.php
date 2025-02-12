@@ -94,8 +94,6 @@ class AuthenController extends Controller
 {
     $request->validate([
         'name' => 'nullable|string|max:255',
-        'firstname' => 'nullable|string|max:255',
-        'email' => 'required|string|email|max:255|unique:users,email,' . auth()->user()->id_user . ',id_user',
         'phone' => 'nullable|string|max:255',
         'address' => 'nullable|string|max:255',
     ]);
@@ -103,8 +101,6 @@ class AuthenController extends Controller
     $user = auth()->user();
     $user->update([
         'name' => $request->name,
-        'firstname' => $request->firstname,
-        'email' => $request->email,
         'phone' => $request->phone,
         'address' => $request->address,
     ]);
