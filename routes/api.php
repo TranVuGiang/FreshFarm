@@ -69,3 +69,15 @@ Route::middleware('auth:sanctum')->group(function () {
         });
     });
 });
+
+
+//admin
+use App\Http\Controllers\Admin\AuthenAdmin\Authen;
+
+Route::prefix('admin')->group(function () {
+    Route::post('/login', [Authen::class, 'login']);
+    Route::middleware(['auth:sanctum', 'admin'])->group(function () {
+        Route::post('/logout', [Authen::class, 'logout']);
+        Route::get('/profile', [Authen::class, 'profile']);
+    });
+});

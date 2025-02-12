@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('phone', 255)->nullable();
             $table->string('address', 255)->nullable();
             $table->integer('role')->nullable();
-            $table->timestamp('login_attempts')->nullable();
+            $table->integer('login_attempts')->default(0);
             $table->timestamp('last_login_attempt')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password', 255);
