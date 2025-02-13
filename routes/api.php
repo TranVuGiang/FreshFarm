@@ -24,8 +24,10 @@ use app\Http\Controllers\Admin\AdminCategoryController;
 
 Route::middleware('auth:sanctum')->get('/user', [AuthenController::class, 'getCurrentUser']);
 Route::middleware('auth:sanctum')->put('/user/update', [AuthenController::class, 'updateUser']);
-
-
+Route::middleware('auth:sanctum')->put('/user/updateAddress', [AuthenController::class, 'updateAddressShipping']);
+Route::post('/change-password', [AuthenController::class, 'changePassword'])->middleware('auth:sanctum');
+Route::post('/forgot-password', [AuthenController::class, 'forgotPassword']);
+Route::post('/reset-password', [AuthenController::class, 'resetPassword']);
 Route::get('/showProduct', [ProductController::class, 'index']);
 Route::get('/products/category/{idcategory}', [ProductController::class, 'showByCategory']);
 Route::get('/searchProducts', [ProductController::class, 'searchByName']);

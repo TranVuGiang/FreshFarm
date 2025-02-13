@@ -12,10 +12,7 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id('id_user');
             $table->string('name', 255)->nullable();
-            $table->string('firstname', 255)->nullable();
             $table->string('email', 255)->unique();
-            $table->string('phone', 255)->nullable();
-            $table->string('address', 255)->nullable();
             $table->integer('role')->nullable();
             $table->integer('login_attempts')->default(0);
             $table->timestamp('last_login_attempt')->nullable();
