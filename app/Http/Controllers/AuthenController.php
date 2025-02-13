@@ -338,8 +338,8 @@ class AuthenController extends Controller
             ]);
 
             $user = User::where('email', $request->email)
-                       ->where('role', 0) // Chỉ cho phép khách hàng
-                       ->first();
+                        ->where('role', 0) // Chỉ áp dụng cho khách hàng
+                        ->first();
 
             if (!$user) {
                 return response()->json([
@@ -348,10 +348,10 @@ class AuthenController extends Controller
                 ], 404);
             }
 
-            // Tạo token reset password
+            // Tạo token đặt lại mật khẩu
             $token = Str::random(64);
 
-            // Lưu thông tin reset password
+            // Lưu token vào bảng `password_reset_tokens`
             DB::table('password_reset_tokens')->updateOrInsert(
                 ['email' => $request->email],
                 [
@@ -360,12 +360,13 @@ class AuthenController extends Controller
                 ]
             );
 
-            // Gửi email
-            $resetLink = env('FRONTEND_URL') . '/reset-password?token=' . $token . '&email=' . $request->email;
+            // Tạo link đặt lại mật khẩu (sử dụng Laravel route)
+            $resetLink = route('password.reset', ['token' => $token, 'email' => $request->email]);
 
+            // Gửi email
             Mail::send('emails.forgot-password', ['resetLink' => $resetLink], function($message) use ($request) {
                 $message->to($request->email);
-                $message->subject('Đặt lại mật khẩu');
+                $message->subject('Yêu cầu đặt lại mật khẩu');
             });
 
             return response()->json([
@@ -403,7 +404,7 @@ class AuthenController extends Controller
                 ], 400);
             }
 
-            // Kiểm tra thời gian token (ví dụ: hết hạn sau 60 phút)
+            // Kiểm tra thời gian token (hết hạn sau 60 phút)
             if (Carbon::parse($resetRecord->created_at)->addMinutes(60)->isPast()) {
                 return response()->json([
                     'status' => false,
@@ -421,6 +422,12 @@ class AuthenController extends Controller
                 ->where('email', $request->email)
                 ->delete();
 
+            // Gửi email thông báo đặt lại mật khẩu thành công
+            Mail::send('emails.reset-password-success', [], function($message) use ($request) {
+                $message->to($request->email);
+                $message->subject('Đặt lại mật khẩu thành công');
+            });
+
             return response()->json([
                 'status' => true,
                 'message' => 'Đặt lại mật khẩu thành công'
@@ -429,8 +436,9 @@ class AuthenController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
-                'message' => $e->getMessage()
+                'message' => 'Đã có lỗi xảy ra. Vui lòng thử lại!'
             ], 500);
         }
     }
+
 }
