@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -22,10 +22,10 @@ Route::post('/forgot-password', [AuthenController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthenController::class, 'resetPassword']);
 
 // Route hiển thị form đặt lại mật khẩu (Laravel Blade)
-Route::get('/reset-password/{token}/{email}', function (Request $request, $token, $email) {
+Route::get('/reset-password', function (Request $request) {
     return view('auth.reset-password', [
-        'token' => $token,
-        'email' => $email
+        'token' => $request->token,
+        'email' => $request->email
     ]);
-});
+})->name('password.reset');
 
