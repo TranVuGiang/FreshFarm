@@ -28,6 +28,7 @@ Route::middleware('auth:sanctum')->put('/user/updateAddress', [AuthenController:
 Route::post('/change-password', [AuthenController::class, 'changePassword'])->middleware('auth:sanctum');
 Route::post('/forgot-password', [AuthenController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthenController::class, 'resetPassword']);
+Route::get('/verify-email/{token}', [AuthenController::class,'verifyEmail'])->name('verify.email');
 Route::get('/showProduct', [ProductController::class, 'index']);
 Route::get('/products/category/{idcategory}', [ProductController::class, 'showByCategory']);
 Route::get('/searchProducts', [ProductController::class, 'searchByName']);

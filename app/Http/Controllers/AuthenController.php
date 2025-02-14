@@ -17,40 +17,75 @@ use Illuminate\Auth\Events\PasswordReset;
 class AuthenController extends Controller
 {
     public function register(Request $request)
-    {
-        try {
-            $request->validate([
-                'name' => 'nullable|string|max:255',
-                'email' => 'required|string|email|max:255|unique:users',
-                'password' => 'required|string|min:8',
-            ]);
+{
+    try {
+        $request->validate([
+            'name' => 'nullable|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8',
+        ]);
 
-            $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-                'role' => 0, // Role mặc định cho khách hàng
-                'status' => 1, // Status mặc định là active
-                'login_attempts' => 0,
-            ]);
+        // Tạo verification token
+        $verificationToken = Str::random(64);
 
-            $token = $user->createToken('customer_token')->plainTextToken;
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => 0,
+            'status' => 0, // Đổi status thành 0 (chưa active)
+            'login_attempts' => 0,
+            'email_verification_token' => $verificationToken,
+        ]);
 
-            return response()->json([
-                'status' => true,
-                'message' => 'Đăng ký thành công',
-                'user' => $user,
-                'token' => $token,
-            ], 201);
+        // Gửi email xác nhận
+        Mail::send('emails.verify', [
+            'user' => $user,
+            'token' => $verificationToken
+        ], function($message) use ($user) {
+            $message->to($user->email);
+            $message->subject('Xác nhận tài khoản');
+        });
 
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => $e->getMessage()
-            ], 500);
-        }
+        $token = $user->createToken('customer_token')->plainTextToken;
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Đăng ký thành công. Vui lòng kiểm tra email để xác nhận tài khoản.',
+            'user' => $user,
+            'token' => $token,
+        ], 201);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => false,
+            'message' => $e->getMessage()
+        ], 500);
+    }
+}
+
+
+public function verifyEmail($token)
+{
+    $user = User::where('email_verification_token', $token)->first();
+
+    if (!$user) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Token không hợp lệ'
+        ], 400);
     }
 
+    $user->email_verified_at = now();
+    $user->status = 1; // Đổi status thành active
+    $user->email_verification_token = null; // Xóa token sau khi verify
+    $user->save();
+
+    return response()->json([
+        'status' => true,
+        'message' => 'Xác nhận email thành công'
+    ], 200);
+}
     public function login(Request $request)
     {
         try {
@@ -331,159 +366,114 @@ class AuthenController extends Controller
     }
 
     public function forgotPassword(Request $request)
-{
-    try {
-        $request->validate([
-            'email' => 'required|email|exists:users,email'
-        ]);
+    {
+        try {
+            $request->validate([
+                'email' => 'required|email|exists:users,email'
+            ]);
 
-        $user = User::where('email', $request->email)
-                    ->where('role', 0)
-                    ->first();
+            $user = User::where('email', $request->email)
+                        ->where('role', 0) // Chỉ áp dụng cho khách hàng
+                        ->first();
 
-        if (!$user) {
+            if (!$user) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Email không tồn tại trong hệ thống'
+                ], 404);
+            }
+
+            // Tạo token đặt lại mật khẩu
+            $token = Str::random(64);
+
+            // Lưu token vào bảng `password_reset_tokens`
+            DB::table('password_reset_tokens')->updateOrInsert(
+                ['email' => $request->email],
+                [
+                    'token' => Hash::make($token),
+                    'created_at' => Carbon::now()
+                ]
+            );
+
+            // Tạo link đặt lại mật khẩu (sử dụng Laravel route)
+            $resetLink = route('password.reset', ['token' => $token, 'email' => $request->email]);
+
+            // Gửi email
+            Mail::send('emails.forgot-password', ['resetLink' => $resetLink], function($message) use ($request) {
+                $message->to($request->email);
+                $message->subject('Yêu cầu đặt lại mật khẩu');
+            });
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Đã gửi link đặt lại mật khẩu vào email của bạn'
+            ]);
+
+        } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
-                'message' => 'Email không tồn tại trong hệ thống'
-            ], 404);
+                'message' => $e->getMessage()
+            ], 500);
         }
-
-        // Tạo token ngắn hơn và an toàn
-        $token = Str::random(32);
-
-        // Set thời gian hết hạn là 10 phút
-        $expiresAt = Carbon::now()->addMinutes(10);
-
-        // Xóa token cũ nếu có trước khi tạo mới
-        DB::table('password_reset_tokens')
-            ->where('email', $request->email)
-            ->delete();
-
-        // Lưu token mới với thời gian hết hạn 10 phút
-        DB::table('password_reset_tokens')->insert([
-            'email' => $request->email,
-            'token' => Hash::make($token),
-            'created_at' => Carbon::now(),
-            'expires_at' => $expiresAt
-        ]);
-
-        // Sử dụng ID để nhận dạng thay vì token
-        $resetId = Str::uuid();
-
-        // Lưu mapping trong cache cũng với thời hạn 10 phút
-        Cache::put('pwd_reset_' . $resetId, $token, now()->addMinutes(10));
-
-        // URL chỉ chứa resetId, không chứa token
-        $resetLink = env('FRONTEND_URL') . '/reset-password/' . $resetId;
-
-        Mail::send('emails.forgot-password', [
-            'resetLink' => $resetLink,
-            'expiresAt' => $expiresAt,
-            'validMinutes' => 10 // Thêm để hiển thị trong email
-        ], function($message) use ($request) {
-            $message->to($request->email);
-            $message->subject('Yêu cầu đặt lại mật khẩu');
-        });
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Đã gửi link đặt lại mật khẩu vào email của bạn. Link có hiệu lực trong 10 phút.'
-        ]);
-
-    } catch (\Exception $e) {
-        \Log::error('Password reset error: ' . $e->getMessage());
-        return response()->json([
-            'status' => false,
-            'message' => 'Có lỗi xảy ra'
-        ], 500);
     }
-}
 
-public function resetPassword(Request $request)
-{
-    try {
-        $request->validate([
-            'reset_id' => 'required|string|uuid', // Thay đổi từ token thành reset_id
-            'email' => 'required|email|exists:users,email',
-            'password' => 'required|string|min:8',
-            'confirm_password' => 'required|string|same:password'
-        ]);
+    public function resetPassword(Request $request)
+    {
+        try {
+            $request->validate([
+                'token' => 'required|string',
+                'email' => 'required|email|exists:users,email',
+                'password' => 'required|string|min:8',
+                'confirm_password' => 'required|string|same:password'
+            ]);
 
-        // Lấy token từ cache dựa trên reset_id
-        $token = Cache::get('pwd_reset_' . $request->reset_id);
+            // Kiểm tra token và email
+            $resetRecord = DB::table('password_reset_tokens')
+                ->where('email', $request->email)
+                ->first();
 
-        if (!$token) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn'
-            ], 400);
-        }
+            if (!$resetRecord || !Hash::check($request->token, $resetRecord->token)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Token không hợp lệ hoặc đã hết hạn'
+                ], 400);
+            }
 
-        // Kiểm tra token trong database
-        $resetRecord = DB::table('password_reset_tokens')
-            ->where('email', $request->email)
-            ->first();
+            // Kiểm tra thời gian token (hết hạn sau 60 phút)
+            if (Carbon::parse($resetRecord->created_at)->addMinutes(60)->isPast()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Token đã hết hạn'
+                ], 400);
+            }
 
-        if (!$resetRecord || !Hash::check($token, $resetRecord->token)) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Token không hợp lệ'
-            ], 400);
-        }
+            // Cập nhật mật khẩu
+            $user = User::where('email', $request->email)->first();
+            $user->password = Hash::make($request->password);
+            $user->save();
 
-        // Kiểm tra thời gian hết hạn
-        if (Carbon::parse($resetRecord->expires_at)->isPast()) {
-            // Xóa token hết hạn
-            Cache::forget('pwd_reset_' . $request->reset_id);
+            // Xóa token đã sử dụng
             DB::table('password_reset_tokens')
                 ->where('email', $request->email)
                 ->delete();
 
+            // Gửi email thông báo đặt lại mật khẩu thành công
+            Mail::send('emails.reset-password-success', [], function($message) use ($request) {
+                $message->to($request->email);
+                $message->subject('Đặt lại mật khẩu thành công');
+            });
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Đặt lại mật khẩu thành công'
+            ]);
+
+        } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
-                'message' => 'Link đặt lại mật khẩu đã hết hạn'
-            ], 400);
+                'message' => 'Đã có lỗi xảy ra. Vui lòng thử lại!'
+            ], 500);
         }
-
-        // Cập nhật mật khẩu
-        $user = User::where('email', $request->email)
-                    ->where('role', 0)
-                    ->first();
-
-        if (!$user) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Không tìm thấy người dùng'
-            ], 404);
-        }
-
-        $user->password = Hash::make($request->password);
-        $user->save();
-
-        // Xóa token đã sử dụng
-        Cache::forget('pwd_reset_' . $request->reset_id);
-        DB::table('password_reset_tokens')
-            ->where('email', $request->email)
-            ->delete();
-
-        // Gửi email thông báo đặt lại mật khẩu thành công
-        Mail::send('emails.reset-password-success', [], function($message) use ($request) {
-            $message->to($request->email);
-            $message->subject('Đặt lại mật khẩu thành công');
-        });
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Đặt lại mật khẩu thành công'
-        ]);
-
-    } catch (\Exception $e) {
-        \Log::error('Reset password error: ' . $e->getMessage());
-        return response()->json([
-            'status' => false,
-            'message' => 'Đã có lỗi xảy ra. Vui lòng thử lại!'
-        ], 500);
     }
-}
 
 }

@@ -15,7 +15,7 @@
                 Đặt lại mật khẩu
             </a>
         </p>
-        <p style="color: #dc3545; font-weight: bold;">Lưu ý: Link này chỉ có hiệu lực trong vòng 10 phút (hết hạn lúc {{ $expiresAt->format('H:i') }} ngày {{ $expiresAt->format('d/m/Y') }}).</p>
+
         <p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.</p>
         <p>Vì lý do bảo mật, vui lòng không chia sẻ link này với bất kỳ ai.</p>
         <hr style="border: 1px solid #eee; margin: 20px 0;">

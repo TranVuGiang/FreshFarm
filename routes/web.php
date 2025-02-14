@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AuthenAdmin\Authen;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -28,4 +29,4 @@ Route::get('/reset-password', function (Request $request) {
         'email' => $request->email
     ]);
 })->name('password.reset');
-
+Route::get('/verify-email/{token}', [AuthenController::class,'verifyEmail'])->name('verify.email');
