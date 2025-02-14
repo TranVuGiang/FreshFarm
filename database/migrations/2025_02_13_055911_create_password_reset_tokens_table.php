@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->id();
-            $table->string('email'); // Cột email
-            $table->string('token'); // Cột token
-            $table->timestamp('created_at')->nullable(); // Cột created_at
-            $table->index('email'); // Tạo chỉ mục cho cột email để tìm kiếm nhanh
+            $table->string('email'); 
+            $table->string('token'); 
+            $table->timestamp('created_at')->nullable(); 
+            $table->index('email'); 
         });
     }
 
