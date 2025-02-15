@@ -73,7 +73,7 @@ public function verifyEmail($token)
         return response()->json([
             'status' => false,
             'message' => 'Token không hợp lệ'
-        ], 400);
+        ], 401);
     }
 
     $user->email_verified_at = now();
@@ -102,7 +102,7 @@ public function verifyEmail($token)
                 return response()->json([
                     'status' => false,
                     'message' => 'Thông tin đăng nhập không hợp lệ'
-                ], 401);
+                ], 400);
             }
 
             // Kiểm tra tài khoản có bị khóa không
@@ -110,7 +110,7 @@ public function verifyEmail($token)
                 return response()->json([
                     'status' => false,
                     'message' => 'Tài khoản đã bị khóa'
-                ], 401);
+                ], 400);
             }
 
             // Kiểm tra số lần đăng nhập sai
@@ -137,9 +137,9 @@ public function verifyEmail($token)
 
                 return response()->json([
                     'status' => false,
-                    'message' => 'Mật khẩu không đúng',
+                    'message' => 'Thông tin đăng nhập không hợp lệ',
                     'attempts_remaining' => 5 - $user->login_attempts
-                ], 401);
+                ], 400);
             }
 
             // Đăng nhập thành công
@@ -315,7 +315,7 @@ public function verifyEmail($token)
                     return response()->json([
                         'status' => false,
                         'message' => 'Tài khoản đã bị khóa'
-                    ], 401);
+                    ], 403);
                 }
             }
             return $next($request);
@@ -337,8 +337,8 @@ public function verifyEmail($token)
             if (!Hash::check($request->current_password, $user->password)) {
                 return response()->json([
                     'status' => false,
-                    'message' => 'Mật khẩu hiện tại không đúng'
-                ], 401);
+                    'message' => 'Thông tin đăng nhập không hợp lệ'
+                ], 400);
             }
 
             // Cập nhật mật khẩu mới
@@ -436,7 +436,7 @@ public function verifyEmail($token)
                 return response()->json([
                     'status' => false,
                     'message' => 'Token không hợp lệ hoặc đã hết hạn'
-                ], 400);
+                ], 401);
             }
 
             // Kiểm tra thời gian token (hết hạn sau 60 phút)
@@ -444,7 +444,7 @@ public function verifyEmail($token)
                 return response()->json([
                     'status' => false,
                     'message' => 'Token đã hết hạn'
-                ], 400);
+                ], 401);
             }
 
             // Cập nhật mật khẩu

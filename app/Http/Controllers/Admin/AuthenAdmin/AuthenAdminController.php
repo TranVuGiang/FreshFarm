@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 
-class Authen extends Controller
+class AuthenAdminController extends Controller
 {
     public function login(Request $request)
     {
@@ -28,7 +28,7 @@ class Authen extends Controller
                 return response()->json([
                     'status' => false,
                     'message' => 'Email không tồn tại hoặc không có quyền admin'
-                ], 401);
+                ], 404);
             }
 
             // Kiểm tra số lần đăng nhập sai
@@ -58,9 +58,9 @@ class Authen extends Controller
 
                 return response()->json([
                     'status' => false,
-                    'message' => 'Mật khẩu không đúng',
+                    'message' => 'Thông tin đăng nhập không hợp lệ',
                     'attempts_remaining' => 5 - $user->login_attempts
-                ], 401);
+                ], 400);
             }
 
             // Tạo token

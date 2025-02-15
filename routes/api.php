@@ -8,7 +8,7 @@ use App\Http\Controllers\BillController;
 use App\Http\Controllers\ShoppingCartController;
 use App\Http\Controllers\Admin\AdminProductController;
 use app\Http\Controllers\Admin\AdminCategoryController;
-
+use App\Http\Controllers\Admin\AuthenAdmin\AuthenAdminController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -53,8 +53,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/orders/{id_bill}', [BillController::class, 'getMyOrderDetail']);
     Route::post('/orders/{id_bill}/cancel', [BillController::class, 'cancelOrder']);
 
+});
 
-    Route::prefix('admin')->group(function () {
+
+//admin
+
+
+Route::prefix('admin')->group(function () {
+    Route::post('/login', [AuthenAdminController::class, 'login']);
+    Route::middleware(['auth:sanctum', 'admin'])->group(function () {
+        Route::post('/logout', [AuthenAdminController::class, 'logout']);
+        Route::get('/profile', [AuthenAdminController::class, 'profile']);
 
         Route::prefix('products')->group(function () {
             Route::get('/', [ProductController::class, 'index']);
@@ -70,17 +79,5 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::put('/{id}', [AdminCategoryController::class, 'update']);
             Route::delete('/{id}', [AdminCategoryController::class, 'destroy']);
         });
-    });
-});
-
-
-//admin
-use App\Http\Controllers\Admin\AuthenAdmin\Authen;
-
-Route::prefix('admin')->group(function () {
-    Route::post('/login', [Authen::class, 'login']);
-    Route::middleware(['auth:sanctum', 'admin'])->group(function () {
-        Route::post('/logout', [Authen::class, 'logout']);
-        Route::get('/profile', [Authen::class, 'profile']);
     });
 });
