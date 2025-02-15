@@ -1,5 +1,5 @@
-import React from "react";
-import { CheckCircle, XCircle, XIcon } from "lucide-react";
+import React, { useEffect } from "react";
+import { CheckCircle, LucideCheckCircle, XCircle, XIcon } from "lucide-react";
 
 export const SuccessNotification = ({
   isOpen,
@@ -96,3 +96,29 @@ export const ErrorNotification = ({
     </div>
   );
 };
+
+export const SimpleSuccessNotification = ({ isOpen, onClose }) => {
+  useEffect(() => {
+    if (isOpen) {
+      const timer = setTimeout(() => {
+        onClose();
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center z-50 ">
+      <div className="bg-black bg-opacity-70 rounded-lg shadow-lg p-14 flex items-center space-x-3">
+        <LucideCheckCircle className="h-10 w-10 text-green-600" />
+        <span className="text-white font-medium text-xl">
+          Thêm vào giỏ hàng thành công!
+        </span>
+      </div>
+    </div>
+  );
+};
+

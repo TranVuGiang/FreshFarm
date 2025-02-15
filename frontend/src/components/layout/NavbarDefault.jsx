@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   MagnifyingGlassIcon,
   UserIcon,
@@ -9,45 +9,34 @@ import {
 import ShoppingCart from "./ShoppingCart";
 import LoginPage from "@/pages/login";
 import { Link, useNavigate } from "react-router-dom";
-const navLists = [
-  { label: "Trang chủ", path: "/",},
-  { label: "Danh mục", path: "/danh-muc" },
-  { label: "Khuyến mãi", path: "/khuyen-mai" },
-  { label: "Giới thiệu", path: "/gioi-thieu" },
-  { label: "Liên hệ", path: "/lien-he" },
-];
+import { DataContext } from "@/constants/DataProvider";
+import { api_ShowShoppingCart } from "@/utils/authService";
+import { ErrorNotification } from "../notifications";
+import { navLists } from "@/constants/DataIndex";
+
 
 const NavbarDefault = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [token, setToken] = useState("")
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
+  const [checkLogin, setCheckLogin] = useState(false);
+
   const navigate = useNavigate();
+  const { token, setCartCount, cartCount } = useContext(DataContext)
 
   useEffect(() => {
-    const localToken = localStorage.getItem("token");
-    const sessionToken = sessionStorage.getItem("token");
-    if(localToken) {
-      setToken(localToken);
-    } else {
-      setToken(sessionToken);
-    }
-  }, [])
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 0) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
+    const loadCarts = async() => {
+      if(token) {
+        const resp = await api_ShowShoppingCart(token);
+        console.log(resp.data.cart_details);
+        const totalItems = resp.data.cart_details.reduce((sum, item) => sum + item.quantity, 0);
+        setCartCount(totalItems);
       }
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  });
+    }
+    loadCarts();
+  }, [token, setCartCount])
 
     // Handle Search
     const handleSearch = (event) => {
@@ -58,11 +47,32 @@ const NavbarDefault = () => {
   // Handle Logout
   const handleLogout = () => {
     localStorage.removeItem("token");
-    setToken(null);
+    sessionStorage.removeItem("token");
     setIsAccountMenuOpen(false);
     window.location.reload();
   };
 
+  //handleCartOpen 
+  const handleCartOpen = (e) => {
+    e.preventDefault();
+    if(!token) {
+      setCheckLogin(true);
+    } else {
+      setIsCartOpen(true);
+    }
+  }
+
+  if (checkLogin) {
+    return (
+      <ErrorNotification
+        isOpen={checkLogin}
+        onClose={() => setCheckLogin(false)}
+        title={"Thông báo"}
+        message={"Bạn cần đăng nhập để mua hàng"}
+        buttonText={"Tiếp tục"}
+      />
+    );
+  }
   
 
   return (
@@ -109,7 +119,7 @@ const NavbarDefault = () => {
                   <UserIcon className="h-6 w-6" />
                 </button>
                 {isAccountMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white text-black shadow-lg rounded-lg py-2">
+                  <div className="absolute right-0 mt-2 w-48 bg-white text-black shadow-lg rounded-lg py-2 z-20">
                     <Link to="/profile" className="block px-4 py-2 hover:bg-gray-200">
                       Thông tin tài khoản
                     </Link>
@@ -126,24 +136,21 @@ const NavbarDefault = () => {
               <div className="relative">
                 <button
                   className="relative cursor-pointer hover:text-gray-300"
-                  onClick={() => setIsLoginOpen(true)}
+                  onClick={() => navigate("/login")}
                 >
                   <UserIcon className="h-6 w-6" />
                 </button>
-                <LoginPage
-                  isOpen={isLoginOpen}
-                  onClose={() => setIsLoginOpen(false)}
-                />
+               
               </div>
             )}
             <div className="relative">
               <button
                 className="relative cursor-pointer hover:text-gray-300"
-                onClick={() => setIsCartOpen(true)}
+                onClick={handleCartOpen}
               >
                 <ShoppingBagIcon className="h-6 w-6" />
                 <span className="absolute flex justify-center -top-2 -right-2 border-2 border-red-600 text-[12px] text-white text-center bg-red-500 rounded-xl w-5 h-5">
-                  1
+                  {cartCount}
                 </span>
               </button>
               <ShoppingCart

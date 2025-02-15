@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   MagnifyingGlassIcon,
   UserIcon,
@@ -9,24 +9,36 @@ import {
 import ShoppingCart from "./ShoppingCart";
 import LoginPage from "@/pages/login";
 import { Link, useNavigate } from "react-router-dom";
-
-const navLists = [
-  { label: "Trang chủ", path: "/" },
-  { label: "Danh mục", path: "/danh-muc" },
-  { label: "Khuyến mãi", path: "/khuyen-mai" },
-  { label: "Giới thiệu", path: "/gioi-thieu" },
-  { label: "Liên hệ", path: "/lien-he" },
-];
+import { ErrorNotification } from "../notifications";
+import { DataContext } from "@/constants/DataProvider";
+import { api_ShowShoppingCart } from "@/utils/authService";
+import { navLists } from "@/constants/DataIndex";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [token, setToken] = useState("");
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
+  const [checkLogin, setCheckLogin] = useState(false);
+
   const navigate = useNavigate();
+  const { token, setCartCount, cartCount } = useContext(DataContext);
+
+  useEffect(() => {
+    const loadCarts = async () => {
+      if (token) {
+        const resp = await api_ShowShoppingCart(token);
+        console.log(resp.data.cart_details);
+        const totalItems = resp.data.cart_details.reduce(
+          (sum, item) => sum + item.quantity,
+          0
+        );
+        setCartCount(totalItems);
+      }
+    };
+    loadCarts();
+  }, [token, setCartCount]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -40,11 +52,6 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   });
 
-  useEffect(() => {
-    const savedtoken = localStorage.getItem("token");
-    setToken(savedtoken);
-  }, []);
-
   // Handle Search
   const handleSearch = (event) => {
     event.preventDefault();
@@ -54,10 +61,32 @@ const Navbar = () => {
   // Handle Logout
   const handleLogout = () => {
     localStorage.removeItem("token");
-    setToken(null);
+    sessionStorage.removeItem("token");
     setIsAccountMenuOpen(false);
     window.location.reload();
   };
+
+  //handleCartOpen
+  const handleCartOpen = (e) => {
+    e.preventDefault();
+    if (!token) {
+      setCheckLogin(true);
+    } else {
+      setIsCartOpen(true);
+    }
+  };
+
+  if (checkLogin) {
+    return (
+      <ErrorNotification
+        isOpen={checkLogin}
+        onClose={() => setCheckLogin(false)}
+        title={"Thông báo"}
+        message={"Bạn cần đăng nhập để mua hàng"}
+        buttonText={"Tiếp tục"}
+      />
+    );
+  }
 
   return (
     <header className="fixed w-full z-30 font-montserrat">
@@ -110,13 +139,25 @@ const Navbar = () => {
                   <UserIcon className="h-6 w-6" />
                 </button>
                 {isAccountMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white text-black shadow-lg rounded-lg py-2">
-                    <Link to="/profile" className="block px-4 py-2 hover:bg-gray-200">
+                  <div
+                    className="absolute right-0 mt-2 w-56 bg-white text-black shadow-lg rounded-lg py-2 z-20 transition-all duration-300"
+                    // Bạn có thể thêm các hiệu ứng khác như fade-in/fade-out nếu muốn
+                  >
+                    <Link
+                      to="/user"
+                      className="block px-4 py-2 hover:bg-gray-200 transition-colors duration-200"
+                    >
                       Thông tin tài khoản
+                    </Link>
+                    <Link
+                      to="/orders"
+                      className="block px-4 py-2 hover:bg-gray-200 transition-colors duration-200"
+                    >
+                      Quản lý đơn hàng
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 hover:bg-gray-200"
+                      className="w-full text-left px-4 py-2 hover:bg-gray-200 transition-colors duration-200"
                     >
                       Đăng xuất
                     </button>
@@ -127,24 +168,21 @@ const Navbar = () => {
               <div className="relative">
                 <button
                   className="relative cursor-pointer hover:text-gray-300"
-                  onClick={() => setIsLoginOpen(true)}
+                  onClick={() => navigate("/login")}
                 >
                   <UserIcon className="h-6 w-6" />
                 </button>
-                <LoginPage
-                  isOpen={isLoginOpen}
-                  onClose={() => setIsLoginOpen(false)}
-                />
               </div>
             )}
+
             <div className="relative">
               <button
                 className="relative cursor-pointer hover:text-gray-300"
-                onClick={() => setIsCartOpen(true)}
+                onClick={handleCartOpen}
               >
                 <ShoppingBagIcon className="h-6 w-6" />
-                <span className="absolute flex justify-center -top-2 -right-2 border-2 border-red-600 text-[12px] text-white text-center bg-red-500 rounded-xl w-5 h-5">
-                  1
+                <span className="absolute flex items-center justify-center -top-2 -right-2 border-2 border-red-600 text-[12px] text-white bg-red-500 rounded-xl w-5 h-5">
+                  {cartCount}
                 </span>
               </button>
               <ShoppingCart
@@ -152,6 +190,7 @@ const Navbar = () => {
                 onClose={() => setIsCartOpen(false)}
               />
             </div>
+
             {/* Menu toggle button (hiện trên màn hình nhỏ) */}
             <button
               className="md:hidden"
@@ -186,9 +225,10 @@ const Navbar = () => {
                 <Link
                   key={i}
                   to={nav.path}
-                  className="block px-3 py-2 rounded-md hover:bg-green-700"
+                  className="rounded-md relative group"
                 >
                   {nav.label}
+                  <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-green-900 group-hover:w-full transition-all duration-500 ease-in-out"></span>
                 </Link>
               ))}
             </div>
@@ -196,7 +236,7 @@ const Navbar = () => {
         </div>
       )}
 
-      {/* Navbar */}
+      {/* NavbarDefault */}
       <nav
         className={`hidden bg-transparent shadow-lg bg-white ${
           isScrolled

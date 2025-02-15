@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Star, ShoppingCart, Heart, X, Filter } from "lucide-react";
 import FilterPanel from "@/components/product-list/FilterPanel";
 import ProductCard from "@/shared/ProductCard";
 import { api_LoadProducts } from "@/utils/authService";
-import { useNavigate } from "react-router-dom";
+import { DataContext } from "@/constants/DataProvider";
+
 
 const ProductCategoryPage = () => {
   const [products, setProducts] = useState([]);
@@ -14,6 +15,14 @@ const ProductCategoryPage = () => {
     ratings: [],
     inStock: false,
   });
+
+  const { token, userDetail } = useContext(DataContext)
+
+  useEffect(() => {
+  console.log(userDetail)
+  console.log(token)
+
+  }, [token,userDetail]);
 
   const [sort, setSort] = useState("default");
   const [showMobileFilter, setShowMobileFilter] = useState(false);
@@ -69,7 +78,6 @@ const ProductCategoryPage = () => {
   const loadProductsData = async () => {
     try {
       const resp = await api_LoadProducts()
-      console.log(resp)
       setProducts(resp.data.data)
     } catch (error) {
       console.log(error);

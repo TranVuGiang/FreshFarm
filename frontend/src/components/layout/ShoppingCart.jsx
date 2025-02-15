@@ -1,10 +1,29 @@
-import { useGSAP } from "@gsap/react";
-import { XIcon } from "lucide-react";
-import React, { useEffect, useRef } from "react";
-import { gsap } from "gsap";
+import { XIcon, Leaf } from "lucide-react";
+import { useContext, useEffect, useRef, useState } from "react";
+import { DataContext } from "@/constants/DataProvider";
+import {
+  api_DeleteShoppingCart,
+  api_ShowShoppingCart,
+} from "@/utils/authService";
+import { Link } from "react-router-dom";
 
 const ShoppingCart = ({ isOpen, onClose }) => {
   const wrapperRef = useRef(null);
+  const [cartItems, setCartItems] = useState(null);
+
+  const { token, cartUpdate, triggerCartUpdate } = useContext(DataContext);
+
+
+  //Load Cart items
+  useEffect(() => {
+    if (token) {
+      const getCartItems = async () => {
+        const resp = await api_ShowShoppingCart(token);
+        setCartItems(resp.data);
+      };
+      getCartItems();
+    }
+  }, [token, cartUpdate]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -13,16 +32,28 @@ const ShoppingCart = ({ isOpen, onClose }) => {
       }
     };
     if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
-
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen, onClose]);
 
+  const handleRemoveItem = async (id_cart_detail) => {
+    if (!token) return;
+    const resp = await api_DeleteShoppingCart(token, id_cart_detail);
+    if (resp.status === true) {
+      setCartItems((prev) => ({
+        ...prev,
+        cart_details: prev.cart_details.filter(
+          (item) => item.id_cart_detail !== id_cart_detail
+        ),
+      }));
+      triggerCartUpdate()
+    }
+  };
 
-    if(!isOpen) return null;
+  if (!isOpen) return null;
 
   return (
     <div
@@ -33,7 +64,7 @@ const ShoppingCart = ({ isOpen, onClose }) => {
       id="shoppingCart"
     >
       <div
-        className="fixed inset-0 transition-opacity"
+        className="fixed inset-0 bg-black bg-opacity-30 transition-opacity"
         aria-hidden="true"
         onClick={onClose}
       ></div>
@@ -41,16 +72,22 @@ const ShoppingCart = ({ isOpen, onClose }) => {
       <div className="fixed inset-0 overflow-hidden">
         <div className="absolute inset-0 overflow-hidden">
           <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
-            <div className="pointer-events-auto w-screen max-w-md" ref={wrapperRef}>
-              <div className="flex h-full flex-col overflow-y-scroll bg-white shadow-xl" >
+            <div
+              className="pointer-events-auto w-screen max-w-md"
+              ref={wrapperRef}
+            >
+              <div className="flex h-full flex-col overflow-y-scroll bg-white shadow-xl">
                 <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6">
                   <div className="flex items-start justify-between">
-                    <h2
-                      className="text-lg font-medium text-gray-900"
-                      id="slide-over-title"
-                    >
-                      GIỎ HÀNG
-                    </h2>
+                    <div className="flex items-center gap-2">
+                      <Leaf className="h-6 w-6 text-green-600" />
+                      <h2
+                        className="text-xl font-medium text-green-800"
+                        id="slide-over-title"
+                      >
+                        Giỏ Hàng FreshFarm
+                      </h2>
+                    </div>
                     <div className="ml-3 flex h-7 items-center">
                       <button
                         type="button"
@@ -58,7 +95,7 @@ const ShoppingCart = ({ isOpen, onClose }) => {
                         onClick={onClose}
                       >
                         <span className="absolute -inset-0.5"></span>
-                        <span className="sr-only">Close panel</span>
+                        <span className="sr-only">Đóng</span>
                         <XIcon className="size-6" />
                       </button>
                     </div>
@@ -70,74 +107,52 @@ const ShoppingCart = ({ isOpen, onClose }) => {
                         role="list"
                         className="-my-6 divide-y divide-gray-200"
                       >
-                        <li className="flex py-6">
-                          <div className="size-24 shrink-0 overflow-hidden rounded-md border border-gray-200">
-                            <img
-                              src="https://tailwindui.com/plus/img/ecommerce-images/shopping-cart-page-04-product-01.jpg"
-                              alt="Salmon orange fabric pouch with match zipper, gray zipper pull, and adjustable hip belt."
-                              className="size-full object-cover"
-                            />
-                          </div>
-
-                          <div className="ml-4 flex flex-1 flex-col">
-                            <div>
-                              <div className="flex justify-between text-base font-medium text-gray-900">
-                                <h3>
-                                  <a href="#">Throwback Hip Bag</a>
-                                </h3>
-                                <p className="ml-4">$90.00</p>
-                              </div>
-                              <p className="mt-1 text-sm text-gray-500">
-                                Salmon
-                              </p>
+                        {cartItems.cart_details.map((cat) => (
+                          <li className="flex py-6" key={cat.id_cart_detail}>
+                            <div className="size-24 shrink-0 overflow-hidden rounded-lg border border-gray-200">
+                              <img
+                                src={cat.product.image}
+                                alt={cat.product.name}
+                                className="size-full object-cover"
+                              />
                             </div>
-                            <div className="flex flex-1 items-end justify-between text-sm">
-                              <p className="text-gray-500">Qty 1</p>
 
-                              <div className="flex">
-                                <button
-                                  type="button"
-                                  className="font-medium text-indigo-600 hover:text-indigo-500"
-                                >
-                                  Remove
-                                </button>
+                            <div className="ml-4 flex flex-1 flex-col">
+                              <div>
+                                <div className="flex justify-between text-base font-medium text-gray-900">
+                                  <h3>
+                                    <a
+                                      href="#"
+                                      className="text-green-700 hover:text-green-800"
+                                    >
+                                      {cat.product.name}
+                                    </a>
+                                  </h3>
+                                  <p className="ml-4">{cat.price}đ</p>
+                                </div>
                               </div>
-                            </div>
-                          </div>
-                        </li>
-                        <li className="flex py-6">
-                          <div className="size-24 shrink-0 overflow-hidden rounded-md border border-gray-200">
-                            <img
-                              src="https://tailwindui.com/plus/img/ecommerce-images/shopping-cart-page-04-product-02.jpg"
-                              alt="Front of satchel with blue canvas body, black straps and handle, drawstring top, and front zipper pouch."
-                              className="size-full object-cover"
-                            />
-                          </div>
+                              <div className="flex flex-1 items-end justify-between text-sm">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-gray-500">
+                                    Số lượng: {cat.quantity}
+                                  </span>
+                                </div>
 
-                          <div className="ml-4 flex flex-1 flex-col">
-                            <div>
-                              <div className="flex justify-between text-base font-medium text-gray-900">
-                                <h3>
-                                  <a href="#">Medium Stuff Satchel</a>
-                                </h3>
-                                <p className="ml-4">$32.00</p>
-                              </div>
-                              <p className="mt-1 text-sm text-gray-500">Blue</p>
-                            </div>
-                            <div className="flex flex-1 items-end justify-between text-sm">
-                              <p className="text-gray-500">Qty 1</p>
-
-                              <div className="flex">
-                                <button
-                                  type="button"
-                                  className="font-medium text-indigo-600 hover:text-indigo-500"
-                                >
-                                  Remove
-                                </button>
+                                <div className="flex">
+                                  <button
+                                    type="button"
+                                    className="font-medium text-red-600 hover:text-red-500"
+                                    onClick={() =>
+                                      handleRemoveItem(cat.id_cart_detail)
+                                    }
+                                  >
+                                    Xóa
+                                  </button>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </li>
+                          </li>
+                        ))}
                       </ul>
                     </div>
                   </div>
@@ -146,27 +161,28 @@ const ShoppingCart = ({ isOpen, onClose }) => {
                 <div className="border-t border-gray-200 px-4 py-6 sm:px-6">
                   <div className="flex justify-between text-base font-medium text-gray-900">
                     <p>Tổng giá: </p>
-                    <p>$262.00</p>
+                    <p>{cartItems.total_price}đ</p>
                   </div>
                   <p className="mt-0.5 text-sm text-gray-500">
-                    Shipping and taxes calculated at checkout.
+                    Phí vận chuyển sẽ được tính ở bước thanh toán.
                   </p>
                   <div className="mt-6">
-                    <a
-                      href="#"
-                      className="flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700"
+                    <Link
+                      to={'/gio-hang'}
+                      className="flex items-center justify-center rounded-md border border-transparent bg-green-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-green-700"
                     >
-                      Checkout
-                    </a>
+                      Thanh toán ngay
+                    </Link>
                   </div>
                   <div className="mt-6 flex justify-center text-center text-sm text-gray-500">
                     <p>
-                      or
+                      hoặc{" "}
                       <button
                         type="button"
-                        className="font-medium text-indigo-600 hover:text-indigo-500"
+                        className="font-medium text-green-600 hover:text-green-500"
+                        onClick={onClose}
                       >
-                        Continue Shopping
+                        Tiếp tục mua sắm
                         <span aria-hidden="true"> &rarr;</span>
                       </button>
                     </p>
