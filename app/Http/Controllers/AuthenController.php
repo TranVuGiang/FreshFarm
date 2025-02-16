@@ -396,7 +396,7 @@ public function verifyEmail($token)
             );
 
             // Tạo link đặt lại mật khẩu (sử dụng Laravel route)
-            $resetLink = route('password.reset', ['token' => $token, 'email' => $request->email]);
+            $resetLink = env('FRONTEND_URL') . '/reset-password?email=' . urlencode($request->email) . '&t=' . $token;
 
             // Gửi email
             Mail::send('emails.forgot-password', ['resetLink' => $resetLink], function($message) use ($request) {

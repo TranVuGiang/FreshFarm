@@ -66,7 +66,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/profile', [AuthenAdminController::class, 'profile']);
 
         Route::prefix('products')->group(function () {
-            Route::get('/', [ProductController::class, 'index']);
+            Route::get('/', [AdminProductController::class, 'index']);
             Route::post('/', [AdminProductController::class, 'store']);
             Route::put('/{id}', [AdminProductController::class, 'update']);
             Route::delete('/{id}', [AdminProductController::class, 'destroy']);

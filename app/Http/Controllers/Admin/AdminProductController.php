@@ -13,7 +13,7 @@ class AdminProductController extends Controller
     public function index()
     {
         try {
-            $products = Product::with('category')->get();
+            $products = Product::paginate(10);
             return response()->json([
                 'success' => true,
                 'message' => 'Lấy danh sách sản phẩm thành công',
