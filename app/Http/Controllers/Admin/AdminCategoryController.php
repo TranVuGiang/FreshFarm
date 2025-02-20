@@ -21,7 +21,7 @@ class AdminCategoryController extends Controller
             $query->where('name', 'like', "%$search%");
         }
 
-        $categories = $query->with('products')->get();
+        $categories = $query->with('products')->paginate(10);
 
         return response()->json([
             'success' => true,
