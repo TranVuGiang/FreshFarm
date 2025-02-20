@@ -11,7 +11,7 @@ class ProductController extends Controller
     //
     public function index()
     {
-        $product = Product::paginate(15);
+        $product = Product::paginate(24);
         return response()->json([
             'success'=>true,
             'data'=>$product,
@@ -29,7 +29,7 @@ class ProductController extends Controller
             ],404);
         }
 
-        $product = Product::where('id_categories',$idcategory)->paginate(15);
+        $product = Product::where('id_categories',$idcategory)->paginate(24);
         return response()->json([
             'success'=>true,
             'data'=>$product,
@@ -51,7 +51,7 @@ class ProductController extends Controller
 
 
         $products = cache()->remember("search_products_{$name}", 3600, function () use ($name) {
-            return Product::where('name', 'like', '%' . $name . '%')->paginate(15);
+            return Product::where('name', 'like', '%' . $name . '%')->paginate(24);
         });
 
         return response()->json([
