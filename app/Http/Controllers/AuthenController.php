@@ -345,12 +345,6 @@ public function verifyEmail($token)
             $user->password = Hash::make($request->new_password);
             $user->save();
 
-            // Đăng xuất khỏi các thiết bị khác
-            $user->tokens()->delete();
-
-            // Tạo token mới
-            $token = $user->createToken('customer_token')->plainTextToken;
-
             return response()->json([
                 'status' => true,
                 'message' => 'Đổi mật khẩu thành công',

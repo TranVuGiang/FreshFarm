@@ -10,22 +10,32 @@ use Illuminate\Support\Facades\Validator;
 class AdminCategoryController extends Controller
 {
     //
-    public function index()
-    {
-        try {
-            $categories = Category::with('products')->get();
-            return response()->json([
-                'success' => true,
-                'message' => 'Lấy danh sách danh mục thành công',
-                'data' => $categories
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
-            ], 500);
+    public function index(Request $request)
+{
+    try {
+        $query = Category::query();
+
+        // Kiểm tra nếu có tham số search
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where('name', 'like', "%$search%");
         }
+
+        $categories = $query->with('products')->get();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Lấy danh sách danh mục thành công',
+            'data' => $categories
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+        ], 500);
     }
+}
+
 
     public function store(Request $request)
     {

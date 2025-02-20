@@ -10,22 +10,32 @@ use App\Models\Product;
 class AdminProductController extends Controller
 {
     //
-    public function index()
-    {
-        try {
-            $products = Product::paginate(10);
-            return response()->json([
-                'success' => true,
-                'message' => 'Lấy danh sách sản phẩm thành công',
-                'data' => $products
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
-            ], 500);
+    public function index(Request $request)
+{
+    try {
+        $query = Product::query();
+
+        // Kiểm tra nếu có tham số search
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where('name', 'like', "%$search%");
         }
+
+        $products = $query->paginate(10);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Lấy danh sách sản phẩm thành công',
+            'data' => $products
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+        ], 500);
     }
+}
+
 
     public function store(Request $request)
     {
