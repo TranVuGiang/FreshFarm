@@ -7,7 +7,7 @@ use App\Http\Controllers\AuthenController;
 use App\Http\Controllers\BillController;
 use App\Http\Controllers\ShoppingCartController;
 use App\Http\Controllers\Admin\AdminProductController;
-use app\Http\Controllers\Admin\AdminCategoryController;
+use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AuthenAdmin\AuthenAdminController;
 /*
 |--------------------------------------------------------------------------
