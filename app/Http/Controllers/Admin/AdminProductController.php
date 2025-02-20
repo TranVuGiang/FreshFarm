@@ -45,7 +45,7 @@ class AdminProductController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
-                    'message' => $validator->errors()
+                    'message' => "Dữ liệu không hợp lệ"
                 ], 400);
             }
 
@@ -84,12 +84,12 @@ class AdminProductController extends Controller
             $product = Product::findOrFail($id);
 
             $validator = Validator::make($request->all(), [
-                'name' => 'string|max:255',
-                'id_categories' => 'exists:categories,id_categories',
-                'price' => 'numeric|min:0',
+                'name' => 'nullable|string|max:255',
+                'id_categories' => 'nullable|exists:categories,id_categories',
+                'price' => 'nullable|numeric|min:0',
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-                'stock_quantity' => 'integer|min:0',
-                'description' => 'string|max:500',
+                'stock_quantity' => 'nullable|integer|min:0',
+                'description' => 'nullable|string|max:500',
                 'weight' => 'nullable|numeric|min:0',
                 'origin' => 'nullable|string|max:255',
                 'certification' => 'nullable|string|max:255'
@@ -98,20 +98,34 @@ class AdminProductController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
-                    'message' => $validator->errors()
+                    'message' => "Dữ liệu không hợp lệ"
                 ], 400);
             }
 
+            // Chuẩn bị dữ liệu để update
+            $updateData = array_filter($request->only([
+                'name',
+                'id_categories',
+                'price',
+                'stock_quantity',
+                'description',
+                'weight',
+                'origin',
+                'certification'
+            ]));
+
             // Xử lý upload ảnh mới nếu có
             if ($request->hasFile('image')) {
-                // Xóa ảnh cũ
-                Storage::disk('public')->delete($product->image);
-                // Upload ảnh mới
+                // Xóa ảnh cũ nếu tồn tại
+                if ($product->image) {
+                    Storage::disk('public')->delete($product->image);
+                }
                 $imagePath = $request->file('image')->store('products', 'public');
-                $product->image = $imagePath;
+                $updateData['image'] = $imagePath;
             }
 
-            $product->update($request->except('image'));
+            // Cập nhật sản phẩm
+            $product->update($updateData);
 
             return response()->json([
                 'success' => true,

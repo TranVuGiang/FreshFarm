@@ -68,7 +68,7 @@ Route::prefix('admin')->group(function () {
         Route::prefix('products')->group(function () {
             Route::get('/', [AdminProductController::class, 'index']);
             Route::post('/', [AdminProductController::class, 'store']);
-            Route::put('/{id}', [AdminProductController::class, 'update']);
+            Route::post('/{id}', [AdminProductController::class, 'update']);
             Route::delete('/{id}', [AdminProductController::class, 'destroy']);
         });
 
@@ -76,7 +76,7 @@ Route::prefix('admin')->group(function () {
         Route::prefix('categories')->group(function () {
             Route::get('/', [AdminCategoryController::class, 'index']);
             Route::post('/', [AdminCategoryController::class, 'store']);
-            Route::put('/{id}', [AdminCategoryController::class, 'update']);
+            Route::post('/{id}', [AdminCategoryController::class, 'update']);
             Route::delete('/{id}', [AdminCategoryController::class, 'destroy']);
         });
     });

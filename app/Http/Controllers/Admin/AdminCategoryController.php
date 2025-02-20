@@ -37,7 +37,7 @@ class AdminCategoryController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
-                    'message' => $validator->errors()
+                    'message' => "Dữ liệu không hợp lệ"
                 ], 400);
             }
 
@@ -68,7 +68,7 @@ class AdminCategoryController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
-                    'message' => $validator->errors()
+                    'message' => "Dữ liệu không hợp lệ"
                 ], 400);
             }
 
