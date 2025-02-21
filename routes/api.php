@@ -9,6 +9,7 @@ use App\Http\Controllers\ShoppingCartController;
 use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AuthenAdmin\AuthenAdminController;
+use App\Http\Controllers\Admin\AmdinManageOrder;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -78,6 +79,12 @@ Route::prefix('admin')->group(function () {
             Route::post('/', [AdminCategoryController::class, 'store']);
             Route::post('/{id}', [AdminCategoryController::class, 'update']);
             Route::delete('/{id}', [AdminCategoryController::class, 'destroy']);
+        });
+
+        Route::prefix('orders')->group(function () {
+            Route::get('/getorder', [AmdinManageOrder::class, 'getOrders']);
+            Route::get('/getorderdetail/{id}', [AmdinManageOrder::class, 'getOrderDetail']);
+            Route::put('/update/{id}/status', [AmdinManageOrder::class, 'updateOrderStatus']);
         });
     });
 });

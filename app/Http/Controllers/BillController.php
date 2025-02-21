@@ -44,6 +44,7 @@ class BillController extends Controller
             $bill->id_user = Auth::id();
             $bill->email = Auth::user()->email;
             $bill->delivery_date = now()->addDays(3);
+            $bill->id_shipping_address=$request->id_shipping_address;
             $bill->total = $cart->total_price;
             $bill->payment_status = PaymentStatus::NOT_PAID;
             $bill->payment_method = $request->input('payment_method', PaymentMethodStatus::CASH);
