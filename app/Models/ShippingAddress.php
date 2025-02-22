@@ -14,6 +14,7 @@ class ShippingAddress extends Model
 
     protected $fillable = [
         'id_user',
+        'recipient_name',
         'address',
         'phone',
         'is_default'

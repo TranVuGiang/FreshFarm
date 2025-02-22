@@ -53,7 +53,7 @@ class BillController extends Controller
 
             foreach ($cart->cartDetails as $cartDetail) {
                 DB::table('bill_products')->insert([
-              'id_bill' => $bill->id_bill,
+                    'id_bill' => $bill->id_bill,
                     'id_product' => $cartDetail->id_product,
                     'quantity' => $cartDetail->quantity,
                     'price' => $cartDetail->price,

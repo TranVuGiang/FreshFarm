@@ -10,6 +10,8 @@ use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AuthenAdmin\AuthenAdminController;
 use App\Http\Controllers\Admin\AmdinManageOrder;
+use App\Http\Controllers\ShippingAdressController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -53,6 +55,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/orders', [BillController::class, 'getMyOrder']);
     Route::get('/orders/{id_bill}', [BillController::class, 'getMyOrderDetail']);
     Route::post('/orders/{id_bill}/cancel', [BillController::class, 'cancelOrder']);
+
+    //ShippingAdress
+    Route::prefix('address')->group(function(){
+        Route::get('/getAddress',[ShippingAdressController::class,'index']);
+        Route::post('/addAddress',[ShippingAdressController::class,'store']);
+        Route::put('/updateAddress/{id}',[ShippingAdressController::class,'update']);
+        Route::delete('/deleteAddress/{id}',[ShippingAdressController::class,'destroy']);
+    });
+
 
 });
 
