@@ -71,8 +71,9 @@ class BillController extends Controller
             DB::commit();
 
             return response()->json([
-                'message' => 'Thanh toán thành công',
-                'bill' => $bill
+                'message' => 'Đặt hàng thành công',
+                'bill' => $bill,
+                'status'=>true
             ]);
         }catch(\Exception $e)
         {

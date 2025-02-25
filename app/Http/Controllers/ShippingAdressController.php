@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 class ShippingAdressController extends Controller
 {
     //
-
     public function index()
     {
         try{
@@ -131,6 +130,5 @@ class ShippingAdressController extends Controller
                 'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
             ], 500);
         }
-
     }
 }
