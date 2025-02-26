@@ -12,7 +12,8 @@ class ShippingAdressController extends Controller
     {
         try{
 
-            $address= ShippingAddress::where('id_user',auth()->user()->id_user)->get();
+            $address= ShippingAddress::where('id_user',auth()->user()->id_user)
+            ->where('status', true)->get();
             if($address->isEmpty())
             {
                 return response()->json([
@@ -111,13 +112,19 @@ class ShippingAdressController extends Controller
     {
         try{
             $address=ShippingAddress::find($id);
+            if(!$address) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Địa chỉ không tồn tại'
+                ], 404);
+            }
             if($address->id_user!=auth()->user()->id_user){
                 return response()->json([
                     'success' => false,
                     'message' => 'Bạn không có quyền xóa địa chỉ này'
                     ], 403);
                     }
-                    $address->delete();
+                    $address->update(['status' => false]);
 
             return response()->json([
                 'success' => true,

@@ -156,7 +156,8 @@ class AmdinManageOrder extends Controller
     protected function isValidStatusTransition($fromStatus, $toStatus)
     {
         $validTransitions = [
-            OrderStatus::ORDER => [OrderStatus::PACK, OrderStatus::DESTROY],
+            OrderStatus::ORDER => [OrderStatus::CONFIRM, OrderStatus::DESTROY],
+            OrderStatus::CONFIRM=>[OrderStatus::PACK,OrderStatus::DESTROY],
             OrderStatus::PACK => [OrderStatus::TRANSPORT, OrderStatus::DESTROY],
             OrderStatus::TRANSPORT => [OrderStatus::RECEIVE],
             OrderStatus::RECEIVE => [],
@@ -165,7 +166,7 @@ class AmdinManageOrder extends Controller
 
 
         if ($toStatus === OrderStatus::DESTROY) {
-            if (!in_array($fromStatus, [OrderStatus::ORDER, OrderStatus::PACK])) {
+            if (!in_array($fromStatus, [OrderStatus::ORDER,OrderStatus::CONFIRM, OrderStatus::PACK])) {
                 return false;
             }
         }

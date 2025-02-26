@@ -142,7 +142,7 @@ class BillController extends Controller
                     'message' => 'Không tìm thấy đơn hàng'
                 ], 404);
             }
-             if (!in_array($order->status, [OrderStatus::ORDER,OrderStatus::PACK])) {
+             if (!in_array($order->status, [OrderStatus::TRANSPORT,OrderStatus::RECEIVE,OrderStatus::DESTROY])) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Không thể hủy đơn hàng ở trạng thái này'

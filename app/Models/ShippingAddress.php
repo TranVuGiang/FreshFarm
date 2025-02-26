@@ -17,11 +17,13 @@ class ShippingAddress extends Model
         'recipient_name',
         'address',
         'phone',
-        'is_default'
+        'is_default',
+         'status'
     ];
 
     protected $casts = [
-        'is_default' => 'boolean'
+        'is_default' => 'boolean',
+         'status'=>'boolean'
     ];
 
     /**
