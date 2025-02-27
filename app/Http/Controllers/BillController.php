@@ -108,7 +108,7 @@ class BillController extends Controller
     {
         try
         {
-            $order = bill::with(['billDetails.product', 'user'])
+            $order = bill::with(['billDetails.product', 'user','shippingAddress'])
             ->where('id_bill', $id_bill)
             ->where('id_user', Auth::id())
             ->first();
@@ -142,7 +142,7 @@ class BillController extends Controller
                     'message' => 'Không tìm thấy đơn hàng'
                 ], 404);
             }
-             if (!in_array($order->status, [OrderStatus::TRANSPORT,OrderStatus::RECEIVE,OrderStatus::DESTROY])) {
+             if (in_array($order->status, [OrderStatus::TRANSPORT,OrderStatus::RECEIVE,OrderStatus::DESTROY])) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Không thể hủy đơn hàng ở trạng thái này'
