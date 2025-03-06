@@ -43,22 +43,48 @@ class ShippingAdressController extends Controller
                 'phone'=>'required|string|max:255'
             ]);
             $userId = auth()->user()->id_user;
-            if($request->is_default)
-            {
-                ShippingAddress::where('id_user',$userId)->update(['is_default'=>false]);
-            }
-            $address=ShippingAddress::create([
-                'id_user'=>$userId,
-                'recipient_name'=>$request->recipient_name,
-                'address'=>$request->address,
-                'phone'=>$request->phone,
-                'is_default'=>$request->is_default ?true:false
-            ]);
-            return response()->json([
-                'success' => true,
-                'message' => 'Tạo địa chỉ thành công',
-                'data'=>$address
-            ],201);
+
+        $existingAddress = ShippingAddress::where('id_user', $userId)
+        ->where('address', $request->address)
+        ->where('recipient_name', $request->recipient_name)
+        ->where('phone', $request->phone)
+        ->where('status', false)
+        ->first();
+
+    if ($existingAddress) {
+        if ($request->is_default) {
+            ShippingAddress::where('id_user', $userId)->update(['is_default' => false]);
+        }
+
+        $existingAddress->update([
+            'status' => true,
+            'is_default' => $request->is_default ? true : false
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tạo địa chỉ thành công',
+            'data' => $existingAddress
+        ], 201);
+    }
+
+    if ($request->is_default) {
+        ShippingAddress::where('id_user', $userId)->update(['is_default' => false]);
+    }
+
+    $address = ShippingAddress::create([
+        'id_user' => $userId,
+        'recipient_name' => $request->recipient_name,
+        'address' => $request->address,
+        'phone' => $request->phone,
+        'is_default' => $request->is_default ? true : false
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Tạo địa chỉ thành công',
+        'data' => $address
+    ], 201);
         } catch(\Exception $e) {
             return response()->json([
                 'success' => false,
